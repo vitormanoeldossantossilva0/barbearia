@@ -3,7 +3,7 @@ import { AdminLayout } from "../components/AdminLayout";
 import { Modal } from "../components/Modal";
 import { Loading } from "../components/Loading";
 import { barberService } from "../services/barbers";
-import type { Barber, BarberAccount } from "../types";
+import type { BarberAccount } from "../types";
 
 export function AdminBarbers() {
   const [me, setMe] = useState<BarberAccount | null>(null);
