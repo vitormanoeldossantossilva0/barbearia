@@ -13,12 +13,11 @@ if (!JWT_SECRET) {
 
 router.post("/reset-password", async (req, res) => {
   try {
-    const email = String(req.body.email ?? "").trim().toLowerCase();
     const code = String(req.body.code ?? "").trim();
     const newPassword = String(req.body.newPassword ?? "");
     const resetCode = String(process.env.RESET_PASSWORD_CODE ?? "").trim();
 
-    if (!email || !code || !newPassword) {
+    if (!code || !newPassword) {
       return res.status(400).json({ mensagem: "Preencha todos os campos." });
     }
 
@@ -30,10 +29,13 @@ router.post("/reset-password", async (req, res) => {
       return res.status(400).json({ mensagem: "A nova senha deve ter pelo menos 6 caracteres." });
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findFirst({
+      where: { barber: { isNot: null } },
+      orderBy: { id: "asc" },
+    });
 
     if (!user) {
-      return res.status(404).json({ mensagem: "Conta não encontrada." });
+      return res.status(404).json({ mensagem: "Nenhuma conta de barbeiro encontrada." });
     }
 
     const passwordHash = await bcrypt.hash(newPassword, 10);

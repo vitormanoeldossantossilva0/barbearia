@@ -4,7 +4,6 @@ import { authService } from "../services/auth";
 
 export function ResetPassword() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");
@@ -24,7 +23,7 @@ export function ResetPassword() {
 
     setSending(true);
     try {
-      const result = await authService.resetPassword(email.trim(), code.trim(), password);
+      const result = await authService.resetPassword(code.trim(), password);
       setSuccess(result.mensagem);
       setTimeout(() => navigate("/admin/login", { replace: true }), 900);
     } catch (e) {
@@ -45,7 +44,7 @@ export function ResetPassword() {
         </p>
         <h1 className="mt-2 text-3xl font-black">Redefinir senha</h1>
         <p className="mt-2 text-sm text-zinc-500">
-          Informe seus dados para criar uma nova senha.
+          Use o código mestre definido no ambiente do sistema para criar uma nova senha.
         </p>
 
         {error && (
@@ -60,21 +59,10 @@ export function ResetPassword() {
           </div>
         )}
 
-        <label className="mt-6 block text-sm font-bold">
-          E-mail
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="mt-2 w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 font-normal outline-none focus:border-amber-500"
-          />
-        </label>
-
         <label className="mt-4 block text-sm font-bold">
-          Código de redefinição
+          Código mestre
           <input
-            type="text"
+            type="password"
             required
             value={code}
             onChange={(e) => setCode(e.target.value)}
