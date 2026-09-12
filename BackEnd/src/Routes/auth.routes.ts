@@ -11,6 +11,45 @@ if (!JWT_SECRET) {
   throw new Error("JWT_SECRET não configurado no ambiente.");
 }
 
+router.post("/reset-password", async (req, res) => {
+  try {
+    const email = String(req.body.email ?? "").trim().toLowerCase();
+    const code = String(req.body.code ?? "").trim();
+    const newPassword = String(req.body.newPassword ?? "");
+    const resetCode = String(process.env.RESET_PASSWORD_CODE ?? "").trim();
+
+    if (!email || !code || !newPassword) {
+      return res.status(400).json({ mensagem: "Preencha todos os campos." });
+    }
+
+    if (!resetCode || code !== resetCode) {
+      return res.status(400).json({ mensagem: "Código de redefinição inválido." });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ mensagem: "A nova senha deve ter pelo menos 6 caracteres." });
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      return res.status(404).json({ mensagem: "Conta não encontrada." });
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: passwordHash },
+    });
+
+    return res.json({ mensagem: "Senha redefinida com sucesso." });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ mensagem: "Erro ao redefinir a senha." });
+  }
+});
+
 router.post("/login", async (req, res) => {
   try {
     const email = String(req.body.email ?? "").trim().toLowerCase();

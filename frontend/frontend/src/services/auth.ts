@@ -8,6 +8,8 @@ export const authService = {
     localStorage.setItem("barbearia_barber", JSON.stringify(result.barber));
     return result;
   },
+  resetPassword: (email: string, code: string, newPassword: string) =>
+    api.post<{ mensagem: string }>("/auth/reset-password", { email, code, newPassword }),
   me: () => api.get<{ barber: BarberAccount }>("/auth/me"),
   logout: () => {
     localStorage.removeItem("barbearia_token");

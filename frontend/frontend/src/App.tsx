@@ -5,6 +5,7 @@ import { Booking } from "./pages/Booking";
 import { BookingSuccess } from "./pages/BookingSuccess";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import { AdminLogin } from "./pages/AdminLogin";
+import { ResetPassword } from "./pages/ResetPassword";
 import { AdminBarbers } from "./pages/AdminBarbers";
 import { AdminServices } from "./pages/AdminServices";
 import { AdminSchedules } from "./pages/AdminSchedules";
@@ -20,6 +21,7 @@ export function App() {
       <Route path="/booking/success" element={<BookingSuccess />} />
 
       <Route path="/admin/login" element={<AdminLogin />} />
+      <Route path="/admin/redefinir-senha" element={<ResetPassword />} />
       <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/admin/barbers" element={<AdminBarbers />} />
       <Route path="/admin/services" element={<AdminServices />} />

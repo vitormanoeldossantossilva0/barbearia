@@ -72,6 +72,13 @@ export function AdminLogin() {
           {sending ? "Entrando..." : "Entrar"}
         </button>
 
+        <a
+          href="/admin/redefinir-senha"
+          className="mt-4 block text-center text-sm text-amber-500 hover:text-amber-400"
+        >
+          Esqueci minha senha
+        </a>
+
         <a href="/" className="mt-4 block text-center text-sm text-zinc-500 hover:text-white">
           ← Voltar para o site
         </a>
