@@ -42,7 +42,7 @@ export function Home() {
               <p className="mb-5 text-sm font-bold uppercase tracking-[.25em] text-amber-500">
                 Seu estilo começa aqui
               </p>
-              <h1 className="max-w-xl text-5xl font-black leading-[.95] tracking-tight text-white sm:text-7xl">
+              <h1 className="max-w-xl text-5xl font-black leading-[.95] tracking-tight text-black sm:text-7xl">
                 Corte bom é aquele que{" "}
                 <span className="text-amber-500">combina com você.</span>
               </h1>

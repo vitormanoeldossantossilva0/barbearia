@@ -25,6 +25,7 @@ model Barber {
   name        String
   description String
   slug        String  @unique
+  whatsapp    String?
 
   user         User?
   services     Service[]

@@ -148,6 +148,28 @@ export function Booking() {
         appointmentDate,
         serviceIds,
       });
+
+      const whatsapp = appointment.barber.whatsapp?.replace(/\\D/g, "") || "";
+      const whatsappMessage = [
+        `Olá, ${appointment.barber.name}! Gostaria de confirmar meu agendamento.`,
+        "",
+        `👤 Cliente: ${appointment.customerName}`,
+        `📅 Data: ${dateFormatter.format(new Date(`${appointmentDate}T12:00:00`))}`,
+        `🕐 Horário: ${appointment.schedule.time}`,
+        `✂️ Serviços: ${appointment.services.map((item) => item.service.name).join(", ")}`,
+        `💰 Total: R$ ${appointment.services.reduce((sum, item) => sum + item.price, 0).toFixed(2).replace(".", ",")}`,
+        `📱 Telefone: ${appointment.customerPhone}`,
+        ...(appointment.description ? [`📝 Observação: ${appointment.description}`] : []),
+      ].join("\\n");
+
+      sessionStorage.setItem(
+        "barbearia:lastBookingWhatsapp",
+        JSON.stringify({
+          phone: whatsapp,
+          message: whatsappMessage,
+        }),
+      );
+
       window.location.assign(`/booking/success?id=${appointment.id}`);
     } catch (e) {
       setError(
@@ -172,7 +194,7 @@ export function Booking() {
   return (
     <>
       <PublicHeader />
-      <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
+      <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6 ">
         <div className="mb-10">
           <p className="text-sm font-bold uppercase tracking-[.2em] text-amber-500">
             Agendamento
@@ -229,20 +251,20 @@ export function Booking() {
           )}
           {step === 1 && (
             <div>
-              <h2 className="text-2xl font-black">O que você quer fazer?</h2>
-              <p className="mt-2 text-zinc-500">
+              <h2 className="text-2xl font-black text-white">O que você quer fazer?</h2>
+              <p className="mt-2 text-zinc-400 ">
                 Serviços de {selectedBarber?.name}. Selecione um ou mais.
               </p>
               {loadingServices ? (
                 <Loading text="Carregando serviços..." />
               ) : services.length === 0 ? (
-                <div className="mt-7">
+                <div className="mt-7 text-white">
                   <Alert>
                     Este barbeiro ainda não possui serviços cadastrados.
                   </Alert>
                 </div>
               ) : (
-                <div className="mt-7 grid gap-3">
+                <div className="mt-7 grid gap-3 text-white">
                   {services.map((s) => {
                     const selected = serviceIds.includes(s.id);
                     return (
@@ -300,7 +322,7 @@ export function Booking() {
                   <Loading text="Buscando horários..." />
                 </div>
               ) : schedules.length === 0 ? (
-                <div className="mt-7">
+                <div className="mt-7 text-white">
                   <Alert>
                     Não há horários disponíveis para este dia. Escolha outra
                     data.
