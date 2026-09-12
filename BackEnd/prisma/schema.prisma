@@ -1,0 +1,105 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum AppointmentStatus {
+  CONFIRMADO
+  CANCELADO
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
+  password String
+  barberId Int?    @unique
+
+  barber Barber? @relation(fields: [barberId], references: [id], onDelete: SetNull)
+}
+
+model Barber {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String
+  slug        String  @unique
+
+  user         User?
+  services     Service[]
+  schedules    Schedule[]
+  scheduleTemplates ScheduleTemplate[]
+  appointments Appointment[]
+}
+
+model Service {
+  id       Int     @id @default(autoincrement())
+  name     String
+  price    Float   @default(0)
+  barberId Int?
+
+  barber       Barber?              @relation(fields: [barberId], references: [id], onDelete: SetNull)
+  appointments AppointmentService[]
+
+  @@index([barberId])
+  @@unique([barberId, name])
+}
+
+// Horários criados pelo barbeiro são modelos de disponibilidade.
+// O cliente escolhe a data; não é necessário cadastrar a data no admin.
+model ScheduleTemplate {
+  id       Int    @id @default(autoincrement())
+  time     String
+  barberId Int
+
+  barber   Barber   @relation(fields: [barberId], references: [id], onDelete: Cascade)
+  schedules Schedule[]
+
+  @@index([barberId])
+  @@unique([barberId, time])
+}
+
+// Schedule continua representando uma ocorrência concreta de um horário.
+// Os registros antigos continuam válidos; os novos são criados quando o cliente reserva uma data.
+model Schedule {
+  id          Int       @id @default(autoincrement())
+  date        DateTime
+  time        String
+  barberId    Int
+  templateId  Int?
+  appointment Appointment?
+
+  barber   Barber            @relation(fields: [barberId], references: [id])
+  template ScheduleTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  @@index([barberId, date])
+  @@index([templateId])
+}
+
+model Appointment {
+  id            Int               @id @default(autoincrement())
+  customerName  String
+  customerPhone String
+  description   String?
+  status        AppointmentStatus @default(CONFIRMADO)
+  barberId      Int
+  scheduleId    Int               @unique
+  createdAt     DateTime          @default(now())
+
+  services AppointmentService[]
+
+  barber   Barber   @relation(fields: [barberId], references: [id])
+  schedule Schedule @relation(fields: [scheduleId], references: [id])
+}
+
+model AppointmentService {
+  appointmentId Int
+  serviceId     Int
+  price         Float @default(0)
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id])
+  service     Service     @relation(fields: [serviceId], references: [id])
+
+  @@id([appointmentId, serviceId])
+}

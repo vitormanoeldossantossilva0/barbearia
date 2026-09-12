@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: barbearia-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: barbearia
+    ports:
+      - "5432:5432"
+    volumes:
+      - barbearia_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  barbearia_postgres_data:
