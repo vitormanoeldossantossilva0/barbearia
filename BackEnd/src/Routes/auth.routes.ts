@@ -25,12 +25,12 @@ router.post("/reset-password", async (req, res) => {
       return res.status(400).json({ mensagem: "Código de redefinição inválido." });
     }
 
-    if (newPassword.length < 6) {
-      return res.status(400).json({ mensagem: "A nova senha deve ter pelo menos 6 caracteres." });
+    if (newPassword.length < 8) {
+      return res.status(400).json({ mensagem: "A nova senha deve ter pelo menos 8 caracteres." });
     }
 
     const user = await prisma.user.findFirst({
-      where: { barber: { isNot: null } },
+      where: { role: "ADMIN", barber: { isNot: null } },
       orderBy: { id: "asc" },
     });
 
@@ -77,7 +77,7 @@ router.post("/login", async (req, res) => {
     }
 
     const token = jwt.sign(
-      { userId: user.id, barberId: user.barber.id },
+      { userId: user.id, barberId: user.barber.id, role: user.role },
       JWT_SECRET,
       { expiresIn: "8h" },
     );
@@ -90,6 +90,7 @@ router.post("/login", async (req, res) => {
         description: user.barber.description,
         slug: user.barber.slug,
         whatsapp: user.barber.whatsapp,
+        role: user.role,
       },
     });
   } catch (error) {
@@ -108,7 +109,7 @@ router.get("/me", authMiddleware, async (req, res) => {
         description: true,
         slug: true,
         whatsapp: true,
-        user: { select: { email: true } },
+        user: { select: { email: true, role: true } },
       },
     });
 

@@ -1,7 +1,28 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { PublicHeader } from "../components/PublicHeader";
+
+type WhatsappData = { phone: string; message: string };
 
 export function BookingSuccess() {
   const params = new URLSearchParams(window.location.search);
+  const [whatsapp, setWhatsapp] = useState<WhatsappData | null>(null);
+
+  useEffect(() => {
+    const raw = sessionStorage.getItem("barbearia:lastBookingWhatsapp");
+    if (!raw) return;
+    try {
+      const data = JSON.parse(raw) as WhatsappData;
+      if (data.phone && data.message) setWhatsapp(data);
+    } catch {
+      sessionStorage.removeItem("barbearia:lastBookingWhatsapp");
+    }
+  }, []);
+
+  const whatsappUrl = whatsapp
+    ? `https://wa.me/${whatsapp.phone}?text=${encodeURIComponent(whatsapp.message)}`
+    : "";
+
   return (
     <>
       <PublicHeader />
@@ -18,16 +39,28 @@ export function BookingSuccess() {
           </h1>
           <p className="mx-auto mt-4 max-w-md leading-7 text-zinc-400">
             Tudo certo! Seu agendamento foi registrado com sucesso. Guarde o
-            número{" "}
-            <strong className="text-white">#{params.get("id") || "—"}</strong>{" "}
+            número <strong className="text-white">#{params.get("id") || "—"}</strong>{" "}
             para referência.
           </p>
-          <a
-            href="/"
-            className="mt-8 inline-block rounded-full bg-amber-500 px-7 py-3.5 font-black text-zinc-950 hover:bg-amber-400"
-          >
-            Voltar para o início
-          </a>
+
+          <div className="mt-8 flex flex-col gap-3">
+            {whatsapp && (
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-full bg-emerald-500 px-7 py-3.5 font-black text-zinc-950 hover:bg-emerald-400"
+              >
+                📱 Enviar agendamento pelo WhatsApp
+              </a>
+            )}
+            <Link
+              to="/"
+              className="rounded-full bg-amber-500 px-7 py-3.5 font-black text-zinc-950 hover:bg-amber-400"
+            >
+              Voltar para o início
+            </Link>
+          </div>
         </div>
       </main>
     </>

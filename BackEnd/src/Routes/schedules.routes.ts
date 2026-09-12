@@ -36,7 +36,14 @@ router.get("/", async (req, res) => {
         prisma.scheduleTemplate.findMany({ where: { barberId }, orderBy: { time: "asc" } }),
         prisma.schedule.findMany({
           where: { barberId, date: { gte: start, lt: end } },
-          include: { barber: true, appointment: true },
+          select: {
+            id: true,
+            date: true,
+            time: true,
+            barberId: true,
+            templateId: true,
+            appointment: { select: { id: true } },
+          },
           orderBy: { time: "asc" },
         }),
       ]);
@@ -44,7 +51,17 @@ router.get("/", async (req, res) => {
       const concreteByTime = new Map(concrete.map((s) => [s.time, s]));
       const result = templates.map((template) => {
         const existing = concreteByTime.get(template.time);
-        if (existing) return existing;
+        if (existing) {
+          return {
+            id: existing.id,
+            date: existing.date.toISOString(),
+            time: existing.time,
+            barberId: existing.barberId,
+            templateId: existing.templateId,
+            appointment: null,
+            available: !existing.appointment,
+          };
+        }
         return {
           id: 0,
           date: start.toISOString(),
@@ -52,14 +69,24 @@ router.get("/", async (req, res) => {
           barberId,
           templateId: template.id,
           appointment: null,
-          barber: undefined,
+          available: true,
         };
       });
 
       // Inclui horários antigos/concretos que não possuem mais um modelo.
       const templateTimes = new Set(templates.map((t) => t.time));
       for (const item of concrete) {
-        if (!templateTimes.has(item.time)) result.push(item);
+        if (!templateTimes.has(item.time)) {
+          result.push({
+            id: item.id,
+            date: item.date.toISOString(),
+            time: item.time,
+            barberId: item.barberId,
+            templateId: item.templateId,
+            appointment: null,
+            available: !item.appointment,
+          });
+        }
       }
 
       result.sort((a, b) => a.time.localeCompare(b.time));
@@ -68,10 +95,27 @@ router.get("/", async (req, res) => {
 
     const schedules = await prisma.schedule.findMany({
       where: barberId !== undefined ? { barberId } : undefined,
-      include: { barber: true, appointment: true },
+      select: {
+        id: true,
+        date: true,
+        time: true,
+        barberId: true,
+        templateId: true,
+        appointment: { select: { id: true } },
+      },
       orderBy: [{ date: "asc" }, { time: "asc" }],
     });
-    return res.json(schedules);
+    return res.json(
+      schedules.map((schedule) => ({
+        id: schedule.id,
+        date: schedule.date.toISOString(),
+        time: schedule.time,
+        barberId: schedule.barberId,
+        templateId: schedule.templateId,
+        appointment: null,
+        available: !schedule.appointment,
+      })),
+    );
   } catch (error) {
     console.error(error);
     return res.status(500).json({ mensagem: "Erro ao buscar horários." });

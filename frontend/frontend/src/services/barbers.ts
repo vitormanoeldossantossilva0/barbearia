@@ -4,6 +4,7 @@ import type { Barber, BarberAccount } from "../types";
 export const barberService = {
   list: () => api.get<Barber[]>("/barbers"),
   me: () => api.get<BarberAccount>("/barbers/me"),
+  manage: () => api.get<BarberAccount[]>("/barbers/manage"),
   create: (
     data: Pick<Barber, "name" | "description"> & {
       email: string;

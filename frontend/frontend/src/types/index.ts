@@ -10,7 +10,7 @@ export interface Barber {
 }
 
 export interface BarberAccount extends Barber {
-  user?: { email: string };
+  user?: { email: string; role?: "ADMIN" | "BARBER" };
 }
 
 export interface AuthResponse {
@@ -32,6 +32,7 @@ export interface Schedule {
   barberId: number;
   barber?: Barber;
   appointment?: Appointment | null;
+  available?: boolean;
   templateId?: number | null;
 }
 

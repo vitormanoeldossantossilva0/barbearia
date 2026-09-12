@@ -57,7 +57,7 @@ export function BarberDetails() {
     setLoadingSchedules(true);
     scheduleService
       .list(barberId, date)
-      .then((items) => setSchedules(items.filter((s) => !s.appointment)))
+      .then((items) => setSchedules(items.filter((s) => s.available !== false)))
       .catch((e) => setError(e.message))
       .finally(() => setLoadingSchedules(false));
   }, [barberId, date]);
@@ -76,7 +76,7 @@ export function BarberDetails() {
       <main className="mx-auto max-w-5xl px-4 py-14 sm:px-6">
         <button
           onClick={() => navigate("/")}
-          className="text-sm text-zinc-500 hover:text-black cursor-pointer"
+          className="text-sm text-zinc-500 hover:text-white cursor-pointer"
         >
           ← Voltar
         </button>
@@ -106,10 +106,10 @@ export function BarberDetails() {
                 <p className="text-sm font-bold uppercase tracking-[.2em] text-amber-500">
                   Disponibilidade
                 </p>
-                <h2 className="mt-2 text-3xl font-black text-black">
+                <h2 className="mt-2 text-3xl font-black text-white">
                   Horários de {barber.name}
                 </h2>
-                <label className="mt-6 block max-w-xs text-sm font-bold text-black">
+                <label className="mt-6 block max-w-xs text-sm font-bold text-zinc-300">
                   Escolha o dia
                   <input
                     type="date"

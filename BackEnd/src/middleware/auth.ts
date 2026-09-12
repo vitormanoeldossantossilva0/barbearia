@@ -7,9 +7,12 @@ if (!JWT_SECRET) {
   throw new Error("JWT_SECRET não configurado no ambiente.");
 }
 
+export type UserRole = "ADMIN" | "BARBER";
+
 export interface AuthPayload {
   userId: number;
   barberId: number;
+  role: UserRole;
 }
 
 declare global {
@@ -31,21 +34,31 @@ export function authMiddleware(
     return res.status(401).json({ mensagem: "Não autenticado." });
   }
 
-  const token = header.slice(7);
-
   try {
-    const payload = jwt.verify(token, JWT_SECRET) as AuthPayload;
+    const payload = jwt.verify(header.slice(7), JWT_SECRET) as Partial<AuthPayload>;
 
     if (
       typeof payload.userId !== "number" ||
-      typeof payload.barberId !== "number"
+      typeof payload.barberId !== "number" ||
+      (payload.role !== "ADMIN" && payload.role !== "BARBER")
     ) {
       return res.status(401).json({ mensagem: "Token inválido." });
     }
 
-    req.auth = payload;
+    req.auth = {
+      userId: payload.userId,
+      barberId: payload.barberId,
+      role: payload.role,
+    };
     next();
   } catch {
     return res.status(401).json({ mensagem: "Token inválido ou expirado." });
   }
+}
+
+export function adminOnly(req: Request, res: Response, next: NextFunction) {
+  if (req.auth?.role !== "ADMIN") {
+    return res.status(403).json({ mensagem: "Acesso permitido somente para administradores." });
+  }
+  next();
 }

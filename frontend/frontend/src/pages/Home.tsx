@@ -43,7 +43,7 @@ export function Home() {
               <p className="mb-5 text-sm font-bold uppercase tracking-[.25em] text-amber-500">
                 Seu estilo começa aqui
               </p>
-              <h1 className="max-w-xl text-5xl font-black leading-[.95] tracking-tight text-black sm:text-7xl ">
+              <h1 className="max-w-xl text-5xl font-black leading-[.95] tracking-tight text-white sm:text-7xl ">
                 Corte bom é aquele que{" "}
                 <span className="text-amber-500">combina com você.</span>
               </h1>
@@ -61,7 +61,7 @@ export function Home() {
 
                 <a
                   href="#barbeiros"
-                  className="cursor-pointer rounded-full border border-white/15 px-7 py-3.5 font-bold text-black transition hover:bg-white/5"
+                  className="cursor-pointer rounded-full border border-white/15 px-7 py-3.5 font-bold text-zinc-300 transition hover:bg-white/5"
                 >
                   Conhecer barbeiros
                 </a>
@@ -120,12 +120,12 @@ export function Home() {
               </div>
             )}
             <div className="mt-10 text-center">
-              <a
-                href="/booking"
+              <Link
+                to="/booking"
                 className="inline-flex rounded-full bg-amber-500 px-7 py-3.5 font-black text-zinc-950 hover:bg-amber-400"
               >
                 Encontrar um horário
-              </a>
+              </Link>
             </div>
           </div>
         </section>

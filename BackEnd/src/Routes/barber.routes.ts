@@ -1,7 +1,7 @@
 import { Router } from "express";
 import bcrypt from "bcrypt";
 import prisma from "../lib/prisma";
-import { authMiddleware } from "../middleware/auth";
+import { adminOnly, authMiddleware } from "../middleware/auth";
 
 const router = Router();
 
@@ -31,7 +31,7 @@ router.get("/me", authMiddleware, async (req, res) => {
   try {
     const barber = await prisma.barber.findUnique({
       where: { id: req.auth!.barberId },
-      select: { id: true, name: true, description: true, slug: true, whatsapp: true, user: { select: { email: true } } },
+      select: { id: true, name: true, description: true, slug: true, whatsapp: true, user: { select: { email: true, role: true } } },
     });
     if (!barber) return res.status(404).json({ mensagem: "Barbeiro não encontrado." });
     return res.json(barber);
@@ -41,12 +41,32 @@ router.get("/me", authMiddleware, async (req, res) => {
   }
 });
 
+router.get("/manage", authMiddleware, adminOnly, async (_req, res) => {
+  try {
+    const barbers = await prisma.barber.findMany({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        slug: true,
+        whatsapp: true,
+        user: { select: { email: true, role: true } },
+      },
+      orderBy: { name: "asc" },
+    });
+    return res.json(barbers);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ mensagem: "Erro ao buscar barbeiros." });
+  }
+});
+
 router.get("/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
     const barber = await prisma.barber.findUnique({
       where: { id },
-      include: { schedules: true },
+      select: { id: true, name: true, description: true, slug: true, whatsapp: true },
     });
     if (!barber) return res.status(404).json({ mensagem: "Barbeiro não encontrado." });
     return res.json(barber);
@@ -56,7 +76,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.post("/", authMiddleware, async (req, res) => {
+router.post("/", authMiddleware, adminOnly, async (req, res) => {
   try {
     const name = String(req.body.name ?? "").trim();
     const description = String(req.body.description ?? "").trim();
@@ -83,7 +103,7 @@ router.post("/", authMiddleware, async (req, res) => {
         data: { name, description, slug, whatsapp: String(req.body.whatsapp ?? "").trim() || null },
       });
       const user = await tx.user.create({
-        data: { email, password: hash, barberId: barber.id },
+        data: { email, password: hash, barberId: barber.id, role: "BARBER" },
       });
       return { barber, user };
     });
@@ -101,7 +121,7 @@ router.post("/", authMiddleware, async (req, res) => {
 router.put("/:id", authMiddleware, async (req, res) => {
   try {
     const id = Number(req.params.id);
-    if (id !== req.auth!.barberId) {
+    if (id !== req.auth!.barberId && req.auth!.role !== "ADMIN") {
       return res.status(403).json({ mensagem: "Você só pode editar sua própria conta." });
     }
 
@@ -166,11 +186,18 @@ router.put("/:id", authMiddleware, async (req, res) => {
 router.delete("/:id", authMiddleware, async (req, res) => {
   try {
     const id = Number(req.params.id);
-    if (id !== req.auth!.barberId) {
+    if (id !== req.auth!.barberId && req.auth!.role !== "ADMIN") {
       return res.status(403).json({ mensagem: "Você só pode excluir sua própria conta." });
     }
+    if (id === req.auth!.barberId) {
+      return res.status(400).json({ mensagem: "A conta administrativa principal não pode ser excluída por aqui." });
+    }
 
-    await prisma.barber.delete({ where: { id } });
+    await prisma.$transaction(async (tx) => {
+      const target = await tx.barber.findUnique({ where: { id }, select: { user: { select: { id: true } } } });
+      await tx.barber.delete({ where: { id } });
+      if (target?.user?.id) await tx.user.delete({ where: { id: target.user.id } });
+    });
     return res.status(204).send();
   } catch (error) {
     console.error(error);

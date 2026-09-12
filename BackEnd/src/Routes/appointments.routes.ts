@@ -4,11 +4,10 @@ import { authMiddleware } from "../middleware/auth";
 
 const router = Router();
 
-router.get("/", async (req, res) => {
+router.get("/", authMiddleware, async (req, res) => {
   try {
-    const barberId = req.query.barberId ? Number(req.query.barberId) : undefined;
     const appointments = await prisma.appointment.findMany({
-      where: barberId ? { barberId } : undefined,
+      where: { barberId: req.auth!.barberId },
       include: {
         barber: true,
         schedule: true,
@@ -171,7 +170,13 @@ router.post("/", async (req, res) => {
         include: { barber: true, schedule: true, services: { include: { service: true } } },
       });
     }).catch((error) => {
-      if (error instanceof Error && error.message === "SCHEDULE_ALREADY_BOOKED") return null;
+      if (
+        error instanceof Error &&
+        (error.message === "SCHEDULE_ALREADY_BOOKED" ||
+          (error as { code?: string }).code === "P2002")
+      ) {
+        return null;
+      }
       throw error;
     });
 

@@ -1,19 +1,30 @@
-# Barbearia
+# Barbearia — Full Stack
 
-## Backend
+Sistema de agendamento online para barbearia, com painel de gestão, serviços por barbeiro, horários recorrentes, agendamentos, WhatsApp e autenticação.
+
+## Stack
+
+- Backend: Node.js, Express, TypeScript, Prisma 7 e PostgreSQL
+- Frontend: React, TypeScript, Vite, Tailwind CSS e React Router
+- Deploy: Render
+
+## Desenvolvimento local
+
+### Backend
 
 ```bash
 cd BackEnd
 npm install
 ```
 
-Crie `BackEnd/.env` com:
+Crie `BackEnd/.env`:
 
 ```env
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/barbearia"
-JWT_SECRET="uma-chave-secreta-forte"
+JWT_SECRET="uma-chave-longa-e-aleatoria"
 BRUNAO_EMAIL="seu-email"
-BRUNAO_PASSWORD="sua-senha-forte"
+BRUNAO_PASSWORD="uma-senha-com-8-ou-mais-caracteres"
+RESET_PASSWORD_CODE="um-codigo-mestre-longo-e-secreto"
 ```
 
 Depois:
@@ -25,7 +36,7 @@ npm run seed
 npm run dev
 ```
 
-## Frontend
+### Frontend
 
 Em outro terminal:
 
@@ -35,8 +46,71 @@ npm install
 npm run dev
 ```
 
-Acesse `http://localhost:5173`.
+## Regras importantes
 
-### Horários
+- O cliente não cria conta.
+- O barbeiro cadastra horários recorrentes, como `09:00`, `10:00` e `14:00`; o cliente escolhe a data.
+- Serviços pertencem ao barbeiro e seus preços são próprios.
+- Agendamentos e dados dos clientes são protegidos por autenticação no painel.
+- O banco possui uma restrição única para impedir duas reservas do mesmo barbeiro na mesma data e horário.
+- O primeiro usuário criado pelo seed é administrador. Novos barbeiros criados pelo administrador recebem o papel `BARBER`.
+- O WhatsApp é opcional. Quando configurado, o cliente pode abrir uma mensagem pré-preenchida na confirmação.
+- O reset de senha por código mestre é um mecanismo de contingência do MVP; em uma operação maior, o ideal é substituir por recuperação com e-mail/token.
 
-No admin, o barbeiro cadastra **somente as horas** (por exemplo, `09:00`, `10:00`, `14:00`). Não é necessário cadastrar dia ou mês. No site, o cliente escolhe a data e depois um dos horários disponíveis.
+## Render
+
+### Backend — Web Service
+
+Root Directory:
+
+```text
+BackEnd
+```
+
+Build Command:
+
+```bash
+npm install && npx prisma generate
+```
+
+Start Command:
+
+```bash
+npx prisma migrate deploy && npm run seed && npx tsx src/server.ts
+```
+
+### Frontend — Static Site
+
+Root Directory:
+
+```text
+frontend/frontend
+```
+
+Build Command:
+
+```bash
+npm install && npm run build
+```
+
+A configuração de SPA em `render.yaml` mantém as rotas do React funcionando diretamente no Render.
+
+## Validação antes do deploy
+
+Frontend:
+
+```bash
+cd frontend/frontend
+npm install
+npm run build
+npm run lint
+```
+
+Backend:
+
+```bash
+cd BackEnd
+npm install
+npx prisma generate
+npx tsc --noEmit
+```

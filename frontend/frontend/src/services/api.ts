@@ -1,4 +1,9 @@
-const API_URL = (import.meta.env.VITE_API_URL || "http://localhost:3333").replace(/\/$/, "");
+const API_URL = (
+  import.meta.env.VITE_API_URL ||
+  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:3333"
+    : "https://barbearia-k02x.onrender.com")
+).replace(/\/$/, "");
 
 export class ApiError extends Error {
   status: number;

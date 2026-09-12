@@ -11,10 +11,16 @@ enum AppointmentStatus {
   CANCELADO
 }
 
+enum UserRole {
+  ADMIN
+  BARBER
+}
+
 model User {
   id       Int     @id @default(autoincrement())
   email    String  @unique
   password String
+  role     UserRole @default(BARBER)
   barberId Int?    @unique
 
   barber Barber? @relation(fields: [barberId], references: [id], onDelete: SetNull)
@@ -75,6 +81,7 @@ model Schedule {
   template ScheduleTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
 
   @@index([barberId, date])
+  @@unique([barberId, date, time])
   @@index([templateId])
 }
 

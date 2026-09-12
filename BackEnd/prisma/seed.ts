@@ -26,8 +26,8 @@ async function main() {
 
   await prisma.user.upsert({
     where: { email },
-    update: { password: passwordHash, barberId: barber.id },
-    create: { email, password: passwordHash, barberId: barber.id },
+    update: { password: passwordHash, barberId: barber.id, role: "ADMIN" },
+    create: { email, password: passwordHash, barberId: barber.id, role: "ADMIN" },
   });
 
   const defaults = [

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { PublicHeader } from "../components/PublicHeader";
 import { Loading } from "../components/Loading";
 import { barberService } from "../services/barbers";
@@ -97,7 +98,7 @@ export function Booking() {
     scheduleService
       .list(barberId, appointmentDate)
       .then((items) => {
-        setSchedules(items.filter((s) => !s.appointment));
+        setSchedules(items.filter((s) => s.available !== false));
         if (initialScheduleId && items.some((s) => s.id === initialScheduleId))
           setScheduleId(initialScheduleId);
         if (
@@ -148,6 +149,24 @@ export function Booking() {
         appointmentDate,
         serviceIds,
       });
+      const whatsapp = appointment.barber.whatsapp?.replace(/\D/g, "") || "";
+      const whatsappMessage = [
+        `Olá, ${appointment.barber.name}! Gostaria de confirmar meu agendamento.`,
+        "",
+        `👤 Cliente: ${appointment.customerName}`,
+        `📅 Data: ${dateFormatter.format(new Date(`${appointmentDate}T12:00:00`))}`,
+        `🕐 Horário: ${appointment.schedule.time}`,
+        `✂️ Serviços: ${appointment.services.map((item) => item.service.name).join(", ")}`,
+        `💰 Total: R$ ${appointment.services.reduce((sum, item) => sum + item.price, 0).toFixed(2).replace(".", ",")}`,
+        `📱 Telefone: ${appointment.customerPhone}`,
+        ...(appointment.description ? [`📝 Observação: ${appointment.description}`] : []),
+      ].join("\n");
+
+      sessionStorage.setItem(
+        "barbearia:lastBookingWhatsapp",
+        JSON.stringify({ phone: whatsapp, message: whatsappMessage }),
+      );
+
       window.location.assign(`/booking/success?id=${appointment.id}`);
     } catch (e) {
       setError(
@@ -442,12 +461,12 @@ export function Booking() {
                 Voltar
               </button>
             ) : (
-              <a
-                href="/"
+              <Link
+                to="/"
                 className="rounded-xl border border-white/10 px-5 py-3 text-center font-bold text-zinc-300"
               >
                 Cancelar
-              </a>
+              </Link>
             )}
             {step < 4 ? (
               <button
