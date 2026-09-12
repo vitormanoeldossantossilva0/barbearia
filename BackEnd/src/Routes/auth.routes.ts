@@ -89,6 +89,7 @@ router.post("/login", async (req, res) => {
         name: user.barber.name,
         description: user.barber.description,
         slug: user.barber.slug,
+        whatsapp: user.barber.whatsapp,
       },
     });
   } catch (error) {
@@ -106,6 +107,7 @@ router.get("/me", authMiddleware, async (req, res) => {
         name: true,
         description: true,
         slug: true,
+        whatsapp: true,
         user: { select: { email: true } },
       },
     });

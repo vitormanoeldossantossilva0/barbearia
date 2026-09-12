@@ -60,8 +60,6 @@ router.post("/", authMiddleware, async (req, res) => {
   try {
     const name = String(req.body.name ?? "").trim();
     const description = String(req.body.description ?? "").trim();
-    const whatsappRaw = String(req.body.whatsapp ?? "").trim();
-    const whatsapp = whatsappRaw ? whatsappRaw.replace(/\D/g, "") : null;
     const email = String(req.body.email ?? "").trim().toLowerCase();
     const password = String(req.body.password ?? "");
 
@@ -82,7 +80,7 @@ router.post("/", authMiddleware, async (req, res) => {
 
     const result = await prisma.$transaction(async (tx) => {
       const barber = await tx.barber.create({
-        data: { name, description, slug, whatsapp },
+        data: { name, description, slug, whatsapp: String(req.body.whatsapp ?? "").trim() || null },
       });
       const user = await tx.user.create({
         data: { email, password: hash, barberId: barber.id },
@@ -109,24 +107,56 @@ router.put("/:id", authMiddleware, async (req, res) => {
 
     const name = String(req.body.name ?? "").trim();
     const description = String(req.body.description ?? "").trim();
-    const whatsappRaw = String(req.body.whatsapp ?? "").trim();
-    const whatsapp = whatsappRaw ? whatsappRaw.replace(/\D/g, "") : null;
+    const whatsapp = String(req.body.whatsapp ?? "").trim() || null;
+    const email = String(req.body.email ?? "").trim().toLowerCase();
+    const password = String(req.body.password ?? "");
 
-    if (name.length < 2) return res.status(400).json({ mensagem: "Informe um nome válido." });
+    if (name.length < 2) {
+      return res.status(400).json({ mensagem: "Informe um nome válido." });
+    }
+    if (!email) {
+      return res.status(400).json({ mensagem: "Informe um e-mail válido." });
+    }
+    if (password && password.length < 8) {
+      return res.status(400).json({ mensagem: "A nova senha deve ter pelo menos 8 caracteres." });
+    }
 
-    const current = await prisma.barber.findUnique({ where: { id } });
+    const current = await prisma.barber.findUnique({
+      where: { id },
+      include: { user: true },
+    });
     if (!current) return res.status(404).json({ mensagem: "Barbeiro não encontrado." });
+    if (!current.user) return res.status(404).json({ mensagem: "Conta de acesso do barbeiro não encontrada." });
+
+    const emailOwner = await prisma.user.findUnique({ where: { email } });
+    if (emailOwner && emailOwner.id !== current.user.id) {
+      return res.status(409).json({ mensagem: "Este e-mail já está em uso." });
+    }
 
     let slug = makeSlug(name);
     const slugOwner = await prisma.barber.findUnique({ where: { slug } });
     if (slugOwner && slugOwner.id !== id) slug = `${slug}-${id}`;
 
-    const barber = await prisma.barber.update({
-      where: { id },
-      data: { name, description, slug, whatsapp },
+    const passwordHash = password ? await bcrypt.hash(password, 12) : undefined;
+
+    const result = await prisma.$transaction(async (tx) => {
+      const barber = await tx.barber.update({
+        where: { id },
+        data: { name, description, slug, whatsapp },
+      });
+
+      await tx.user.update({
+        where: { id: current.user!.id },
+        data: {
+          email,
+          ...(passwordHash ? { password: passwordHash } : {}),
+        },
+      });
+
+      return barber;
     });
 
-    return res.json(barber);
+    return res.json(result);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ mensagem: "Erro ao atualizar barbeiro." });

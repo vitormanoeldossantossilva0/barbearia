@@ -148,33 +148,6 @@ export function Booking() {
         appointmentDate,
         serviceIds,
       });
-
-      const whatsapp = appointment.barber.whatsapp?.replace(/\D/g, "") || "";
-      const whatsappMessage = [
-        `Olá, ${appointment.barber.name}! Gostaria de confirmar meu agendamento.`,
-        "",
-        `👤 Cliente: ${appointment.customerName}`,
-        `📅 Data: ${dateFormatter.format(new Date(`${appointmentDate}T12:00:00`))}`,
-        `🕐 Horário: ${appointment.schedule.time}`,
-        `✂️ Serviços: ${appointment.services.map((item) => item.service.name).join(", ")}`,
-        `💰 Total: R$ ${appointment.services
-          .reduce((sum, item) => sum + item.price, 0)
-          .toFixed(2)
-          .replace(".", ",")}`,
-        `📱 Telefone: ${appointment.customerPhone}`,
-        ...(appointment.description
-          ? [`📝 Observação: ${appointment.description}`]
-          : []),
-      ].join("\n");
-
-      sessionStorage.setItem(
-        "barbearia:lastBookingWhatsapp",
-        JSON.stringify({
-          phone: whatsapp,
-          message: whatsappMessage,
-        }),
-      );
-
       window.location.assign(`/booking/success?id=${appointment.id}`);
     } catch (e) {
       setError(
