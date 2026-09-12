@@ -1,24 +1,7 @@
-import { useEffect, useState } from "react";
 import { PublicHeader } from "../components/PublicHeader";
 
 export function BookingSuccess() {
   const params = new URLSearchParams(window.location.search);
-  const [whatsappUrl, setWhatsappUrl] = useState("");
-
-  useEffect(() => {
-    const raw = sessionStorage.getItem("barbearia:lastBookingWhatsapp");
-    if (!raw) return;
-    try {
-      const data = JSON.parse(raw) as { phone?: string; message?: string };
-      if (data.phone && data.message) {
-        const phone = data.phone.startsWith("55") ? data.phone : `55${data.phone}`;
-        setWhatsappUrl(`https://wa.me/${phone}?text=${encodeURIComponent(data.message)}`);
-      }
-    } catch {
-      sessionStorage.removeItem("barbearia:lastBookingWhatsapp");
-    }
-  }, []);
-
   return (
     <>
       <PublicHeader />
@@ -39,26 +22,9 @@ export function BookingSuccess() {
             <strong className="text-white">#{params.get("id") || "—"}</strong>{" "}
             para referência.
           </p>
-
-          {whatsappUrl ? (
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-full bg-emerald-500 px-7 py-3.5 font-black text-white hover:bg-emerald-400"
-            >
-              <span className="text-xl">☏</span>
-              Enviar agendamento pelo WhatsApp
-            </a>
-          ) : (
-            <p className="mx-auto mt-8 max-w-md rounded-xl border border-white/10 bg-zinc-950 p-4 text-sm text-zinc-500">
-              O WhatsApp deste barbeiro ainda não foi configurado.
-            </p>
-          )}
-
           <a
             href="/"
-            className="mt-3 inline-block rounded-full border border-white/10 px-7 py-3.5 font-black text-zinc-300 hover:border-white/20 hover:text-white"
+            className="mt-8 inline-block rounded-full bg-amber-500 px-7 py-3.5 font-black text-zinc-950 hover:bg-amber-400"
           >
             Voltar para o início
           </a>

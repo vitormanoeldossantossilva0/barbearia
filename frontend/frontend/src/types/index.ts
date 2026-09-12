@@ -5,7 +5,6 @@ export interface Barber {
   name: string;
   description: string;
   slug: string;
-  whatsapp?: string | null;
   schedules?: Schedule[];
 }
 

@@ -17,7 +17,7 @@ const makeSlug = (name: string) =>
 router.get("/", async (_req, res) => {
   try {
     const barbers = await prisma.barber.findMany({
-      select: { id: true, name: true, description: true, slug: true, whatsapp: true },
+      select: { id: true, name: true, description: true, slug: true },
       orderBy: { name: "asc" },
     });
     return res.json(barbers);
@@ -31,7 +31,7 @@ router.get("/me", authMiddleware, async (req, res) => {
   try {
     const barber = await prisma.barber.findUnique({
       where: { id: req.auth!.barberId },
-      select: { id: true, name: true, description: true, slug: true, whatsapp: true, user: { select: { email: true } } },
+      select: { id: true, name: true, description: true, slug: true, user: { select: { email: true } } },
     });
     if (!barber) return res.status(404).json({ mensagem: "Barbeiro não encontrado." });
     return res.json(barber);
@@ -60,8 +60,6 @@ router.post("/", authMiddleware, async (req, res) => {
   try {
     const name = String(req.body.name ?? "").trim();
     const description = String(req.body.description ?? "").trim();
-    const whatsappRaw = String(req.body.whatsapp ?? "").trim();
-    const whatsapp = whatsappRaw ? whatsappRaw.replace(/\D/g, "") : null;
     const email = String(req.body.email ?? "").trim().toLowerCase();
     const password = String(req.body.password ?? "");
 
@@ -82,7 +80,7 @@ router.post("/", authMiddleware, async (req, res) => {
 
     const result = await prisma.$transaction(async (tx) => {
       const barber = await tx.barber.create({
-        data: { name, description, slug, whatsapp },
+        data: { name, description, slug },
       });
       const user = await tx.user.create({
         data: { email, password: hash, barberId: barber.id },
@@ -109,8 +107,6 @@ router.put("/:id", authMiddleware, async (req, res) => {
 
     const name = String(req.body.name ?? "").trim();
     const description = String(req.body.description ?? "").trim();
-    const whatsappRaw = String(req.body.whatsapp ?? "").trim();
-    const whatsapp = whatsappRaw ? whatsappRaw.replace(/\D/g, "") : null;
 
     if (name.length < 2) return res.status(400).json({ mensagem: "Informe um nome válido." });
 
@@ -123,7 +119,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
 
     const barber = await prisma.barber.update({
       where: { id },
-      data: { name, description, slug, whatsapp },
+      data: { name, description, slug },
     });
 
     return res.json(barber);

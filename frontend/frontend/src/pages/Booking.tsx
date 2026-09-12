@@ -47,9 +47,9 @@ export function Booking() {
   const [barbers, setBarbers] = useState<Barber[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
-  const [step, setStep] = useState(
-    initialScheduleId ? 2 : initialBarberId ? 1 : 0,
-  );
+  // Quando o cliente vem da tela de horários, o barbeiro e o horário
+  // já estão definidos. O próximo passo deve ser Serviços.
+  const [step, setStep] = useState(initialBarberId ? 1 : 0);
   const [barberId, setBarberId] = useState(initialBarberId);
   const [serviceIds, setServiceIds] = useState<number[]>([]);
   const [scheduleId, setScheduleId] = useState(initialScheduleId);
@@ -148,28 +148,6 @@ export function Booking() {
         appointmentDate,
         serviceIds,
       });
-
-      const whatsapp = appointment.barber.whatsapp?.replace(/\\D/g, "") || "";
-      const whatsappMessage = [
-        `Olá, ${appointment.barber.name}! Gostaria de confirmar meu agendamento.`,
-        "",
-        `👤 Cliente: ${appointment.customerName}`,
-        `📅 Data: ${dateFormatter.format(new Date(`${appointmentDate}T12:00:00`))}`,
-        `🕐 Horário: ${appointment.schedule.time}`,
-        `✂️ Serviços: ${appointment.services.map((item) => item.service.name).join(", ")}`,
-        `💰 Total: R$ ${appointment.services.reduce((sum, item) => sum + item.price, 0).toFixed(2).replace(".", ",")}`,
-        `📱 Telefone: ${appointment.customerPhone}`,
-        ...(appointment.description ? [`📝 Observação: ${appointment.description}`] : []),
-      ].join("\\n");
-
-      sessionStorage.setItem(
-        "barbearia:lastBookingWhatsapp",
-        JSON.stringify({
-          phone: whatsapp,
-          message: whatsappMessage,
-        }),
-      );
-
       window.location.assign(`/booking/success?id=${appointment.id}`);
     } catch (e) {
       setError(
@@ -194,7 +172,7 @@ export function Booking() {
   return (
     <>
       <PublicHeader />
-      <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6 ">
+      <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
         <div className="mb-10">
           <p className="text-sm font-bold uppercase tracking-[.2em] text-amber-500">
             Agendamento
@@ -222,7 +200,7 @@ export function Booking() {
               <h2 className="text-2xl font-black text-white">Escolha o barbeiro</h2>
               <div className="mt-7 grid gap-3 sm:grid-cols-2">
                 {barbers.map((b) => (
-                  <button
+                  <button 
                     key={b.id}
                     onClick={() => {
                       setBarberId(b.id);
@@ -231,7 +209,7 @@ export function Booking() {
                       setScheduleTemplateId(0);
                       setStep(1);
                     }}
-                    className={`rounded-2xl border p-4 text-left ${barberId === b.id ? "border-amber-500 bg-amber-500/10" : "border-white/10 bg-zinc-950"}`}
+                    className={`rounded-2xl border p-4 text-left ${barberId === b.id ? "border-amber-500 bg-amber-500/10" : "border-white/10 bg-zinc-950"} hover:cursor-pointer`}
                   >
                     <div className="flex items-center gap-4">
                       <span className="grid h-12 w-12 place-items-center rounded-xl bg-zinc-800 text-2xl">
@@ -252,19 +230,19 @@ export function Booking() {
           {step === 1 && (
             <div>
               <h2 className="text-2xl font-black text-white">O que você quer fazer?</h2>
-              <p className="mt-2 text-zinc-400 ">
+              <p className="mt-2 text-zinc-500 ">
                 Serviços de {selectedBarber?.name}. Selecione um ou mais.
               </p>
               {loadingServices ? (
                 <Loading text="Carregando serviços..." />
               ) : services.length === 0 ? (
-                <div className="mt-7 text-white">
+                <div className="mt-7 ">
                   <Alert>
                     Este barbeiro ainda não possui serviços cadastrados.
                   </Alert>
                 </div>
               ) : (
-                <div className="mt-7 grid gap-3 text-white">
+                <div className="mt-7 grid gap-3 text-white" >
                   {services.map((s) => {
                     const selected = serviceIds.includes(s.id);
                     return (
@@ -322,7 +300,7 @@ export function Booking() {
                   <Loading text="Buscando horários..." />
                 </div>
               ) : schedules.length === 0 ? (
-                <div className="mt-7 text-white">
+                <div className="mt-7">
                   <Alert>
                     Não há horários disponíveis para este dia. Escolha outra
                     data.
@@ -437,7 +415,7 @@ export function Booking() {
                   </div>
                 ))}
                 <div className="flex justify-between bg-amber-500/5 p-4">
-                  <span className="font-bold">Total</span>
+                  <span className="font-bold text-white">Total</span>
                   <span className="font-black text-amber-500">
                     R$ {total.toFixed(2).replace(".", ",")}
                   </span>
@@ -449,7 +427,7 @@ export function Booking() {
             {step > 0 ? (
               <button
                 onClick={() => setStep((s) => s - 1)}
-                className="rounded-xl border border-white/10 px-5 py-3 font-bold text-zinc-300"
+                className="rounded-xl border border-white/10 px-5 py-3 font-bold text-zinc-300 hover:cursor-pointer"
               >
                 Voltar
               </button>
@@ -465,15 +443,15 @@ export function Booking() {
               <button
                 disabled={!canNext}
                 onClick={() => setStep((s) => s + 1)}
-                className="rounded-xl bg-amber-500 px-6 py-3 font-black text-zinc-950 disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-xl bg-amber-500 px-6 py-3 font-black text-zinc-950 disabled:cursor-not-allowed disabled:opacity-40 hover:cursor-pointer"
               >
                 Continuar
               </button>
             ) : (
-              <button
+              <button 
                 disabled={sending}
                 onClick={submit}
-                className="rounded-xl bg-amber-500 px-6 py-3 font-black text-zinc-950 disabled:opacity-50"
+                className="rounded-xl bg-amber-500 px-6 py-3 font-black text-zinc-950 disabled:opacity-50 hover:cursor-pointer"
               >
                 {sending ? "Agendando..." : "Confirmar agendamento"}
               </button>

@@ -76,7 +76,7 @@ export function BarberDetails() {
       <main className="mx-auto max-w-5xl px-4 py-14 sm:px-6">
         <button
           onClick={() => navigate("/")}
-          className="text-sm text-zinc-500 hover:text-white"
+          className="text-sm text-zinc-500 hover:text-black cursor-pointer"
         >
           ← Voltar
         </button>
@@ -91,13 +91,13 @@ export function BarberDetails() {
                 <div className="grid h-44 place-items-center rounded-2xl bg-zinc-950 text-7xl">
                   💈
                 </div>
-                <h1 className="mt-7 text-3xl font-black">{barber.name}</h1>
+                <h1 className="mt-7 text-3xl font-black text-white">{barber.name}</h1>
                 <p className="mt-3 leading-7 text-zinc-400">
                   {barber.description}
                 </p>
                 <button
                   onClick={() => navigate(`/booking?barber=${barber.id}`)}
-                  className="mt-7 block w-full rounded-xl bg-amber-500 px-5 py-3 text-center font-black text-zinc-950"
+                  className="mt-7 block w-full rounded-xl bg-amber-500 px-5 py-3 text-center font-black text-zinc-950 hover:cursor-pointer"
                 >
                   Agendar com {barber.name.split(" ")[0]}
                 </button>
@@ -106,10 +106,10 @@ export function BarberDetails() {
                 <p className="text-sm font-bold uppercase tracking-[.2em] text-amber-500">
                   Disponibilidade
                 </p>
-                <h2 className="mt-2 text-3xl font-black text-white">
+                <h2 className="mt-2 text-3xl font-black text-black">
                   Horários de {barber.name}
                 </h2>
-                <label className="mt-6 block max-w-xs text-sm font-bold text-white">
+                <label className="mt-6 block max-w-xs text-sm font-bold text-black">
                   Escolha o dia
                   <input
                     type="date"
@@ -132,7 +132,7 @@ export function BarberDetails() {
                   </div>
                 ) : (
                   <div className="mt-7">
-                    <p className="mb-3 font-bold capitalize text-zinc-300">
+                    <p className="mb-3 font-bold capitalize text-zinc-600">
                       {dateFormatter.format(new Date(`${date}T12:00:00`))}
                     </p>
                     <div className="flex flex-wrap gap-2">

@@ -8,6 +8,7 @@ import { serviceService } from "../services/services";
 import { useEffect, useState } from "react";
 import type { Barber, Service } from "../types";
 import type { ReactNode } from "react";
+import { Link } from "react-router-dom";
 
 function Alert({ children }: { children: ReactNode }) {
   return (
@@ -42,7 +43,7 @@ export function Home() {
               <p className="mb-5 text-sm font-bold uppercase tracking-[.25em] text-amber-500">
                 Seu estilo começa aqui
               </p>
-              <h1 className="max-w-xl text-5xl font-black leading-[.95] tracking-tight text-black sm:text-7xl">
+              <h1 className="max-w-xl text-5xl font-black leading-[.95] tracking-tight text-black sm:text-7xl ">
                 Corte bom é aquele que{" "}
                 <span className="text-amber-500">combina com você.</span>
               </h1>
@@ -50,16 +51,17 @@ export function Home() {
                 Escolha seu barbeiro, encontre um horário e agende em poucos
                 passos. Sem complicação.
               </p>
-              <div className="mt-9 flex flex-wrap gap-3">
-                <a
-                  href="/booking"
-                  className="rounded-full bg-amber-500 px-7 py-3.5 font-black text-zinc-950 hover:bg-amber-400"
+              <div className="relative z-10 mt-9 flex flex-wrap gap-3">
+                <Link
+                  to="/booking"
+                  className="cursor-pointer rounded-full bg-amber-500 px-7 py-3.5 font-black text-zinc-950 transition hover:bg-amber-400"
                 >
                   Agendar agora
-                </a>
+                </Link>
+
                 <a
                   href="#barbeiros"
-                  className="rounded-full border border-white/15 px-7 py-3.5 font-bold text-white hover:bg-white/5"
+                  className="cursor-pointer rounded-full border border-white/15 px-7 py-3.5 font-bold text-black transition hover:bg-white/5"
                 >
                   Conhecer barbeiros
                 </a>
