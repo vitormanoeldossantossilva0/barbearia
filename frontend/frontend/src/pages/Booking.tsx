@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { PublicHeader } from "../components/PublicHeader";
 import { Loading } from "../components/Loading";
 import { barberService } from "../services/barbers";
@@ -197,10 +197,12 @@ export function Booking() {
         <section className="rounded-3xl border border-white/10 bg-zinc-900 p-6 sm:p-8">
           {step === 0 && (
             <div>
-              <h2 className="text-2xl font-black text-white">Escolha o barbeiro</h2>
+              <h2 className="text-2xl font-black text-white">
+                Escolha o barbeiro
+              </h2>
               <div className="mt-7 grid gap-3 sm:grid-cols-2">
                 {barbers.map((b) => (
-                  <button 
+                  <button
                     key={b.id}
                     onClick={() => {
                       setBarberId(b.id);
@@ -229,7 +231,9 @@ export function Booking() {
           )}
           {step === 1 && (
             <div>
-              <h2 className="text-2xl font-black text-white">O que você quer fazer?</h2>
+              <h2 className="text-2xl font-black text-white">
+                O que você quer fazer?
+              </h2>
               <p className="mt-2 text-zinc-500 ">
                 Serviços de {selectedBarber?.name}. Selecione um ou mais.
               </p>
@@ -242,7 +246,7 @@ export function Booking() {
                   </Alert>
                 </div>
               ) : (
-                <div className="mt-7 grid gap-3 text-white" >
+                <div className="mt-7 grid gap-3 text-white">
                   {services.map((s) => {
                     const selected = serviceIds.includes(s.id);
                     return (
@@ -275,7 +279,9 @@ export function Booking() {
           )}
           {step === 2 && (
             <div>
-              <h2 className="text-2xl font-black text-white">Escolha o dia e o horário</h2>
+              <h2 className="text-2xl font-black text-white">
+                Escolha o dia e o horário
+              </h2>
               <p className="mt-2 text-zinc-500">
                 O barbeiro mantém os horários disponíveis; você escolhe o dia.
               </p>
@@ -336,7 +342,9 @@ export function Booking() {
               </p>
               <div className="mt-7 space-y-5">
                 <label className="block">
-                  <span className="mb-2 block text-sm font-bold text-white">Nome</span>
+                  <span className="mb-2 block text-sm font-bold text-white">
+                    Nome
+                  </span>
                   <input
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
@@ -345,7 +353,9 @@ export function Booking() {
                   />
                 </label>
                 <label className="block">
-                  <span className="mb-2 block text-sm font-bold text-white">Telefone</span>
+                  <span className="mb-2 block text-sm font-bold text-white">
+                    Telefone
+                  </span>
                   <input
                     value={customerPhone}
                     onChange={(e) => setCustomerPhone(e.target.value)}
@@ -448,7 +458,7 @@ export function Booking() {
                 Continuar
               </button>
             ) : (
-              <button 
+              <button
                 disabled={sending}
                 onClick={submit}
                 className="rounded-xl bg-amber-500 px-6 py-3 font-black text-zinc-950 disabled:opacity-50 hover:cursor-pointer"
