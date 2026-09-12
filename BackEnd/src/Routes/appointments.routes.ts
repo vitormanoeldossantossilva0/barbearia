@@ -135,6 +135,7 @@ router.post("/", async (req, res) => {
 
     const existingSchedule = await prisma.schedule.findFirst({
       where: { barberId: barberIdNumber, date: { gte: start, lt: end }, time },
+      include: { appointment: true },
     });
     if (existingSchedule?.appointment) {
       return res.status(409).json({ mensagem: "Esse horário já foi reservado." });
