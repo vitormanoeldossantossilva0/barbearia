@@ -157,11 +157,15 @@ export function Booking() {
         `📅 Data: ${dateFormatter.format(new Date(`${appointmentDate}T12:00:00`))}`,
         `🕐 Horário: ${appointment.schedule.time}`,
         `✂️ Serviços: ${appointment.services.map((item) => item.service.name).join(", ")}`,
-        `💰 Total: R$ ${appointment.services.reduce((sum, item) => sum + item.price, 0).toFixed(2).replace(".", ",")}`,
+        `💰 Total: R$ ${appointment.services
+          .reduce((sum, item) => sum + item.price, 0)
+          .toFixed(2)
+          .replace(".", ",")}`,
         `📱 Telefone: ${appointment.customerPhone}`,
-        ...(appointment.description ? [`📝 Observação: ${appointment.description}`] : []),
-      ].join("
-");
+        ...(appointment.description
+          ? [`📝 Observação: ${appointment.description}`]
+          : []),
+      ].join("\n");
 
       sessionStorage.setItem(
         "barbearia:lastBookingWhatsapp",
