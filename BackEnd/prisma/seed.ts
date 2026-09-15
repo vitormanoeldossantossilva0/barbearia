@@ -31,20 +31,45 @@ async function main() {
   });
 
   const defaults = [
-    ["Cabelo", 30],
-    ["Barba", 25],
-    ["Sobrancelha", 15],
-    ["Pintura", 50],
+    ["Cabelo", 30, "CORTE"],
+    ["Barba", 25, "BARBA"],
+    ["Sobrancelha", 15, "SOBRANCELHA"],
+    ["Pintura", 50, "PINTURA"],
   ] as const;
 
-  for (const [name, price] of defaults) {
+  for (const [name, price, category] of defaults) {
     const existing = await prisma.service.findFirst({
-      where: { barberId: barber.id, name },
+      where: {
+        barberId: barber.id,
+        name: { equals: name, mode: "insensitive" },
+      },
     });
 
-    if (!existing) {
+    if (existing) {
+      await prisma.service.update({
+        where: { id: existing.id },
+        data: { price, category, barberId: barber.id },
+      });
+      continue;
+    }
+
+    // Aproveita um serviço legado sem barbeiro, quando existir, em vez de
+    // criar um segundo registro invisível na área administrativa.
+    const legacy = await prisma.service.findFirst({
+      where: {
+        barberId: null,
+        name: { equals: name, mode: "insensitive" },
+      },
+    });
+
+    if (legacy) {
+      await prisma.service.update({
+        where: { id: legacy.id },
+        data: { price, category, barberId: barber.id },
+      });
+    } else {
       await prisma.service.create({
-        data: { name, price, barberId: barber.id },
+        data: { name, price, category, barberId: barber.id },
       });
     }
   }

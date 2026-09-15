@@ -4,16 +4,38 @@ import { authMiddleware } from "../middleware/auth";
 
 const router = Router();
 
+const appointmentInclude = {
+  barber: true,
+  schedule: true,
+  services: { include: { service: { include: { comboItems: { include: { service: true } } } } } },
+} as const;
+
+function parseDate(dateInput: unknown) {
+  const value = String(dateInput ?? "").trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) return null;
+  return date;
+}
+
 router.get("/", authMiddleware, async (req, res) => {
   try {
+    const date = req.query.date ? parseDate(req.query.date) : null;
+    if (req.query.date && !date) {
+      return res.status(400).json({ mensagem: "Data inválida." });
+    }
+
+    const where = { barberId: req.auth!.barberId, ...(date ? (() => {
+      const end = new Date(date);
+      end.setDate(end.getDate() + 1);
+      return { schedule: { date: { gte: date, lt: end } } };
+    })() : {}) };
+
     const appointments = await prisma.appointment.findMany({
-      where: { barberId: req.auth!.barberId },
-      include: {
-        barber: true,
-        schedule: true,
-        services: { include: { service: true } },
-      },
-      orderBy: { createdAt: "desc" },
+      where,
+      include: appointmentInclude,
+      orderBy: [{ schedule: { date: "asc" } }, { schedule: { time: "asc" } }],
     });
     return res.json(appointments);
   } catch (error) {
@@ -26,11 +48,7 @@ router.get("/mine", authMiddleware, async (req, res) => {
   try {
     const appointments = await prisma.appointment.findMany({
       where: { barberId: req.auth!.barberId },
-      include: {
-        barber: true,
-        schedule: true,
-        services: { include: { service: true } },
-      },
+      include: appointmentInclude,
       orderBy: { createdAt: "desc" },
     });
     return res.json(appointments);
@@ -45,11 +63,7 @@ router.get("/:id", authMiddleware, async (req, res) => {
     const id = Number(req.params.id);
     const appointment = await prisma.appointment.findUnique({
       where: { id },
-      include: {
-        barber: true,
-        schedule: true,
-        services: { include: { service: true } },
-      },
+      include: appointmentInclude,
     });
     if (!appointment) return res.status(404).json({ mensagem: "Agendamento não encontrado." });
     if (appointment.barberId !== req.auth!.barberId) return res.status(403).json({ mensagem: "Você não pode acessar esse agendamento." });
@@ -104,11 +118,47 @@ router.post("/", async (req, res) => {
     end.setDate(end.getDate() + 1);
 
     const uniqueIds = [...new Set(serviceIds.map(Number))];
+    if (uniqueIds.some((id) => !Number.isInteger(id) || id <= 0)) {
+      return res.status(400).json({ mensagem: "Um ou mais serviços são inválidos." });
+    }
+
     const services = await prisma.service.findMany({
       where: { id: { in: uniqueIds }, barberId: barberIdNumber },
     });
     if (services.length !== uniqueIds.length) {
       return res.status(400).json({ mensagem: "Um ou mais serviços não pertencem a esse barbeiro." });
+    }
+
+    const combos = await prisma.service.findMany({
+      where: { id: { in: uniqueIds }, category: "COMBO", barberId: barberIdNumber },
+      include: { comboItems: { include: { service: { select: { category: true } } } } },
+    });
+
+    if (combos.length > 1) {
+      return res.status(400).json({ mensagem: "Selecione apenas um combo por agendamento." });
+    }
+
+    const selectedNonCombos = services.filter((service) => service.category !== "COMBO");
+    const occupiedCategories = new Set<string>();
+
+    for (const service of selectedNonCombos) {
+      if (occupiedCategories.has(service.category)) {
+        return res.status(400).json({
+          mensagem: "Escolha somente uma opção por categoria para evitar serviços redundantes.",
+        });
+      }
+      occupiedCategories.add(service.category);
+    }
+
+    if (combos[0]) {
+      for (const item of combos[0].comboItems) {
+        if (occupiedCategories.has(item.service.category)) {
+          return res.status(400).json({
+            mensagem: "Os serviços escolhidos entram em conflito com o combo selecionado.",
+          });
+        }
+        occupiedCategories.add(item.service.category);
+      }
     }
 
     let time = "";
@@ -168,7 +218,7 @@ router.post("/", async (req, res) => {
           scheduleId: finalScheduleId,
           services: { create: services.map((service) => ({ serviceId: service.id, price: service.price })) },
         },
-        include: { barber: true, schedule: true, services: { include: { service: true } } },
+        include: appointmentInclude,
       });
     }).catch((error) => {
       if (
@@ -206,11 +256,7 @@ router.patch("/:id/status", authMiddleware, async (req, res) => {
     const updated = await prisma.appointment.update({
       where: { id },
       data: { status },
-      include: {
-        barber: true,
-        schedule: true,
-        services: { include: { service: true } },
-      },
+      include: appointmentInclude,
     });
     return res.json(updated);
   } catch (error) {
@@ -265,11 +311,7 @@ router.delete("/:id", authMiddleware, async (req, res) => {
     const updated = await prisma.appointment.update({
       where: { id },
       data: { status: "CANCELADO" },
-      include: {
-        barber: true,
-        schedule: true,
-        services: { include: { service: true } },
-      },
+      include: appointmentInclude,
     });
     return res.json(updated);
   } catch (error) {

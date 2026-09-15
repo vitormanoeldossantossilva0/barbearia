@@ -51,8 +51,10 @@ npm run dev
 - O cliente não cria conta.
 - O barbeiro cadastra horários recorrentes, como `09:00`, `10:00` e `14:00`; o cliente escolhe a data.
 - Serviços pertencem ao barbeiro e seus preços são próprios.
+- Serviços podem ser organizados em cortes, barba, sobrancelha, pinturas e combos; combos usam serviços do próprio barbeiro e têm preço próprio.
 - Agendamentos e dados dos clientes são protegidos por autenticação no painel.
 - O banco possui uma restrição única para impedir duas reservas do mesmo barbeiro na mesma data e horário.
+- Horários já reservados continuam visíveis para o cliente, mas ficam desabilitados como “Indisponível”.
 - O primeiro usuário criado pelo seed é administrador. Novos barbeiros criados pelo administrador recebem o papel `BARBER`.
 - O WhatsApp é opcional. Quando configurado, o cliente pode abrir uma mensagem pré-preenchida na confirmação.
 - O reset de senha por código mestre é um mecanismo de contingência do MVP; em uma operação maior, o ideal é substituir por recuperação com e-mail/token.

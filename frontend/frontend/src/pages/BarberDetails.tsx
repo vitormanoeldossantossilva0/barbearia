@@ -57,7 +57,7 @@ export function BarberDetails() {
     setLoadingSchedules(true);
     scheduleService
       .list(barberId, date)
-      .then((items) => setSchedules(items.filter((s) => s.available !== false)))
+      .then(setSchedules)
       .catch((e) => setError(e.message))
       .finally(() => setLoadingSchedules(false));
   }, [barberId, date]);
@@ -139,14 +139,20 @@ export function BarberDetails() {
                       {schedules.map((s) => (
                         <button
                           key={`${s.templateId || s.id}-${s.time}`}
-                          onClick={() =>
+                          disabled={s.available === false}
+                          onClick={() => {
+                            if (s.available === false) return;
                             navigate(
                               `/booking?barber=${barber.id}&schedule=${s.id || 0}&template=${s.templateId || 0}&date=${date}`,
-                            )
-                          }
-                          className="rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-sm font-bold text-zinc-300 hover:border-amber-500 hover:text-amber-500"
+                            );
+                          }}
+                          className={`rounded-xl border px-4 py-3 text-sm font-bold ${
+                            s.available === false
+                              ? "cursor-not-allowed border-white/5 bg-zinc-900/60 text-zinc-600"
+                              : "border-white/10 bg-zinc-950 text-zinc-300 hover:border-amber-500 hover:text-amber-500"
+                          }`}
                         >
-                          {s.time} · Agendar
+                          {s.time} {s.available === false ? "· Indisponível" : "· Agendar"}
                         </button>
                       ))}
                     </div>

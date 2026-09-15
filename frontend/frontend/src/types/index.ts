@@ -1,4 +1,5 @@
 export type AppointmentStatus = "CONFIRMADO" | "CANCELADO";
+export type ServiceCategory = "CORTE" | "BARBA" | "SOBRANCELHA" | "PINTURA" | "COMBO";
 
 export interface Barber {
   id: number;
@@ -18,11 +19,19 @@ export interface AuthResponse {
   barber: BarberAccount;
 }
 
+export interface ServiceComboItem {
+  comboId: number;
+  serviceId: number;
+  service: Service;
+}
+
 export interface Service {
   id: number;
   name: string;
   price: number;
   barberId?: number | null;
+  category: ServiceCategory;
+  comboItems?: ServiceComboItem[];
 }
 
 export interface Schedule {

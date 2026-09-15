@@ -3,6 +3,7 @@ import type { Appointment, AppointmentStatus, CreateAppointmentPayload } from ".
 
 export const appointmentService = {
   list: () => api.get<Appointment[]>("/appointments/mine"),
+  listByDate: (date: string) => api.get<Appointment[]>(`/appointments?date=${encodeURIComponent(date)}`),
   get: (id: number) => api.get<Appointment>(`/appointments/${id}`),
   create: (data: CreateAppointmentPayload) => api.post<Appointment>("/appointments", data),
   updateStatus: (id: number, status: AppointmentStatus) =>

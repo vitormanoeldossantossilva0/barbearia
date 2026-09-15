@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { PublicHeader } from "../components/PublicHeader";
+import { Modal } from "../components/Modal";
 import { Loading } from "../components/Loading";
 import { barberService } from "../services/barbers";
 import { serviceService } from "../services/services";
 import { scheduleService } from "../services/schedules";
 import { appointmentService } from "../services/appointments";
-import type { Barber, Schedule, Service } from "../types";
+import type { Barber, Schedule, Service, ServiceCategory } from "../types";
 
 const steps = ["Barbeiro", "Serviços", "Horário", "Seus dados", "Revisão"];
 const getLocalDate = () => {
@@ -38,6 +39,27 @@ function PublicFooter() {
   );
 }
 
+const categoryLabel: Record<ServiceCategory, string> = {
+  CORTE: "Corte",
+  BARBA: "Barba",
+  SOBRANCELHA: "Sobrancelha",
+  PINTURA: "Pintura",
+  COMBO: "Combo",
+};
+
+const normalCategoryGroups: Array<{ title: string; description: string; categories: ServiceCategory[] }> = [
+  {
+    title: "Cortes e cuidados",
+    description: "Escolha uma opção de cada tipo. Assim você não precisa marcar dois estilos de corte ao mesmo tempo.",
+    categories: ["CORTE", "BARBA", "SOBRANCELHA"],
+  },
+  {
+    title: "Pinturas",
+    description: "Platinado, luzes, pintura e outras técnicas ficam em uma categoria própria.",
+    categories: ["PINTURA"],
+  },
+];
+
 export function Booking() {
   const params = new URLSearchParams(window.location.search);
   const initialBarberId = Number(params.get("barber")) || 0;
@@ -65,6 +87,7 @@ export function Booking() {
   const [loadingSchedules, setLoadingSchedules] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+  const [barberToConfirm, setBarberToConfirm] = useState<Barber | null>(null);
 
   useEffect(() => {
     barberService
@@ -98,14 +121,19 @@ export function Booking() {
     scheduleService
       .list(barberId, appointmentDate)
       .then((items) => {
-        setSchedules(items.filter((s) => s.available !== false));
-        if (initialScheduleId && items.some((s) => s.id === initialScheduleId))
+        setSchedules(items);
+        if (
+          initialScheduleId &&
+          items.some((s) => s.id === initialScheduleId && s.available !== false)
+        ) {
           setScheduleId(initialScheduleId);
+        }
         if (
           initialTemplateId &&
-          items.some((s) => s.templateId === initialTemplateId)
-        )
+          items.some((s) => s.templateId === initialTemplateId && s.available !== false)
+        ) {
           setScheduleTemplateId(initialTemplateId);
+        }
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoadingSchedules(false));
@@ -113,10 +141,50 @@ export function Booking() {
 
   const selectedBarber = barbers.find((b) => b.id === barberId);
   const selectedSchedule =
-    schedules.find((s) => s.id === scheduleId && !s.templateId) ??
-    schedules.find((s) => s.templateId === scheduleTemplateId);
+    schedules.find((s) => s.available !== false && s.id === scheduleId && !s.templateId) ??
+    schedules.find((s) => s.available !== false && s.templateId === scheduleTemplateId);
   const selectedServices = services.filter((s) => serviceIds.includes(s.id));
+  const selectedCombo = selectedServices.find((service) => service.category === "COMBO");
+  const comboCategories = new Set(
+    selectedCombo?.comboItems?.map((item) => item.service.category) ?? [],
+  );
   const total = selectedServices.reduce((sum, s) => sum + s.price, 0);
+
+  const toggleService = (service: Service) => {
+    setError("");
+    const isSelected = serviceIds.includes(service.id);
+
+    if (isSelected) {
+      setServiceIds((ids) => ids.filter((id) => id !== service.id));
+      return;
+    }
+
+    if (service.category === "COMBO") {
+      const componentCategories = new Set(
+        service.comboItems?.map((item) => item.service.category) ?? [],
+      );
+      setServiceIds((ids) => [
+        ...ids.filter((id) => {
+          const existing = services.find((item) => item.id === id);
+          if (!existing || existing.category === "COMBO") return false;
+          return !componentCategories.has(existing.category);
+        }),
+        service.id,
+      ]);
+      return;
+    }
+
+    setServiceIds((ids) => {
+      const next = ids.filter((id) => {
+        const existing = services.find((item) => item.id === id);
+        if (!existing) return false;
+        if (existing.category === service.category) return false;
+        if (existing.category === "COMBO" && existing.comboItems?.some((item) => item.service.category === service.category)) return false;
+        return true;
+      });
+      return [...next, service.id];
+    });
+  };
 
   const canNext =
     step === 0
@@ -124,7 +192,7 @@ export function Booking() {
       : step === 1
         ? serviceIds.length > 0
         : step === 2
-          ? !!(scheduleId || scheduleTemplateId)
+          ? !!selectedSchedule
           : step === 3
             ? customerName.trim().length >= 2 &&
               customerPhone.trim().length >= 8
@@ -244,13 +312,7 @@ export function Booking() {
                 {barbers.map((b) => (
                   <button
                     key={b.id}
-                    onClick={() => {
-                      setBarberId(b.id);
-                      setServiceIds([]);
-                      setScheduleId(0);
-                      setScheduleTemplateId(0);
-                      setStep(1);
-                    }}
+                    onClick={() => setBarberToConfirm(b)}
                     className={`rounded-2xl border p-4 text-left ${barberId === b.id ? "border-amber-500 bg-amber-500/10" : "border-white/10 bg-zinc-950"} hover:cursor-pointer`}
                   >
                     <div className="flex items-center gap-4">
@@ -274,45 +336,125 @@ export function Booking() {
               <h2 className="text-2xl font-black text-white">
                 O que você quer fazer?
               </h2>
-              <p className="mt-2 text-zinc-300 ">
-                Serviços de {selectedBarber?.name}. Selecione um ou mais.
+              <p className="mt-2 text-zinc-300">
+                Serviços de {selectedBarber?.name}. Escolha as opções que realmente fazem sentido juntas.
               </p>
               {loadingServices ? (
                 <Loading text="Carregando serviços..." />
               ) : services.length === 0 ? (
-                <div className="mt-7 ">
-                  <Alert>
-                    Este barbeiro ainda não possui serviços cadastrados.
-                  </Alert>
+                <div className="mt-7">
+                  <Alert>Este barbeiro ainda não possui serviços cadastrados.</Alert>
                 </div>
               ) : (
-                <div className="mt-7 grid gap-3 text-white">
-                  {services.map((s) => {
-                    const selected = serviceIds.includes(s.id);
-                    return (
-                      <button
-                        key={s.id}
-                        onClick={() =>
-                          setServiceIds((ids) =>
-                            selected
-                              ? ids.filter((id) => id !== s.id)
-                              : [...ids, s.id],
-                          )
-                        }
-                        className={` flex items-center justify-between gap-2 w-auto rounded-2xl border p-4 text-left ${selected ? "border-amber-500 bg-amber-500/10" : "border-white/10 bg-zinc-950  *:hover:border-amber-500/50"}`}
-                      >
-                        <span className="font-bold">{s.name}</span>
-                        <span className="ml-auto mr-2 text-sm font-bold whitespace-nowrap text-amber-500">
-                          R$ {s.price.toFixed(2).replace(".", ",")}
-                        </span>
-                        <span
-                          className={`shrink-0 grid h-6 w-6 place-items-center rounded-full border text-xs ${selected ? "justify-center items-center border-amber-500 bg-amber-500 text-zinc-950" : "border-zinc-700 text-transparent"}`}
-                        >
-                          ✓
-                        </span>
-                      </button>
-                    );
-                  })}
+                <div className="mt-7 space-y-8">
+                  {normalCategoryGroups.map((group) => (
+                    <section key={group.title}>
+                      <h3 className="text-lg font-black text-white">{group.title}</h3>
+                      <p className="mt-1 text-sm leading-6 text-zinc-500">{group.description}</p>
+
+                      <div className="mt-5 space-y-6">
+                        {group.categories.map((category) => {
+                          const categoryServices = services.filter((service) => service.category === category);
+                          if (categoryServices.length === 0) return null;
+                          const categorySelected = selectedServices.some((service) => service.category === category);
+
+                          return (
+                            <div key={category}>
+                              <div className="mb-2 flex items-center justify-between gap-3">
+                                <p className="text-sm font-bold text-zinc-300">{categoryLabel[category]}</p>
+                                {categorySelected && (
+                                  <span className="text-xs font-bold text-amber-500">1 opção selecionada</span>
+                                )}
+                              </div>
+                              <div className="grid gap-3">
+                                {categoryServices.map((service) => {
+                                  const selected = serviceIds.includes(service.id);
+                                  const blockedByCombo = !selected && comboCategories.has(category);
+                                  const blockedByCategory = !selected && categorySelected;
+                                  const disabled = blockedByCombo || blockedByCategory;
+                                  return (
+                                    <button
+                                      key={service.id}
+                                      type="button"
+                                      disabled={disabled}
+                                      onClick={() => toggleService(service)}
+                                      className={`flex items-center justify-between gap-3 rounded-2xl border p-4 text-left transition ${
+                                        selected
+                                          ? "border-amber-500 bg-amber-500/10"
+                                          : disabled
+                                            ? "cursor-not-allowed border-white/5 bg-zinc-950/50 opacity-45"
+                                            : "border-white/10 bg-zinc-950 hover:border-amber-500/50"
+                                      }`}
+                                    >
+                                      <div className="min-w-0">
+                                        <span className="block font-bold text-white">{service.name}</span>
+                                        {disabled && (
+                                          <span className="mt-1 block text-xs text-zinc-600">
+                                            {blockedByCombo ? "Já incluído no combo selecionado" : "Outra opção desta categoria já foi escolhida"}
+                                          </span>
+                                        )}
+                                      </div>
+                                      <div className="flex shrink-0 items-center gap-3">
+                                        <span className="text-sm font-bold text-amber-500">
+                                          R$ {service.price.toFixed(2).replace(".", ",")}
+                                        </span>
+                                        <span className={`grid h-6 w-6 place-items-center rounded-full border text-xs ${selected ? "border-amber-500 bg-amber-500 text-zinc-950" : "border-zinc-700 text-transparent"}`}>
+                                          ✓
+                                        </span>
+                                      </div>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </section>
+                  ))}
+
+                  {services.filter((service) => service.category === "COMBO").length > 0 && (
+                    <section>
+                      <h3 className="text-lg font-black text-white">Combos</h3>
+                      <p className="mt-1 text-sm leading-6 text-zinc-500">
+                        Um combo substitui os serviços que fazem parte dele. Você ainda pode adicionar outras categorias que não estejam incluídas.
+                      </p>
+                      <div className="mt-5 grid gap-3">
+                        {services.filter((service) => service.category === "COMBO").map((service) => {
+                          const selected = serviceIds.includes(service.id);
+                          const anotherComboSelected = Boolean(selectedCombo && !selected);
+                          return (
+                            <button
+                              key={service.id}
+                              type="button"
+                              disabled={anotherComboSelected}
+                              onClick={() => toggleService(service)}
+                              className={`flex items-start justify-between gap-4 rounded-2xl border p-4 text-left transition ${
+                                selected
+                                  ? "border-amber-500 bg-amber-500/10"
+                                  : anotherComboSelected
+                                    ? "cursor-not-allowed border-white/5 bg-zinc-950/50 opacity-45"
+                                    : "border-white/10 bg-zinc-950 hover:border-amber-500/50"
+                              }`}
+                            >
+                              <div>
+                                <span className="block font-bold text-white">{service.name}</span>
+                                <span className="mt-1 block text-xs leading-5 text-zinc-500">
+                                  {service.comboItems?.map((item) => item.service.name).join(" + ") || "Combo sem itens"}
+                                </span>
+                              </div>
+                              <div className="flex shrink-0 items-center gap-3">
+                                <span className="text-sm font-bold text-amber-500">
+                                  R$ {service.price.toFixed(2).replace(".", ",")}
+                                </span>
+                                <span className={`grid h-6 w-6 place-items-center rounded-full border text-xs ${selected ? "border-amber-500 bg-amber-500 text-zinc-950" : "border-zinc-700 text-transparent"}`}>✓</span>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </section>
+                  )}
                 </div>
               )}
             </div>
@@ -360,15 +502,29 @@ export function Booking() {
                     )}
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    {schedules.map((s) => (
-                      <button
-                        key={`${s.templateId || "schedule"}-${s.id}-${s.time}`}
-                        onClick={() => chooseSchedule(s)}
-                        className={`rounded-xl border px-4 py-3 text-sm font-bold ${(s.templateId && scheduleTemplateId === s.templateId) || (!s.templateId && scheduleId === s.id) ? "border-amber-500 bg-amber-500 text-zinc-950" : "border-white/10 bg-zinc-950 text-zinc-300 hover:border-amber-500/50"}`}
-                      >
-                        {s.time}
-                      </button>
-                    ))}
+                    {schedules.map((s) => {
+                      const unavailable = s.available === false;
+                      const selected =
+                        !unavailable &&
+                        ((s.templateId && scheduleTemplateId === s.templateId) ||
+                          (!s.templateId && scheduleId === s.id));
+                      return (
+                        <button
+                          key={`${s.templateId || "schedule"}-${s.id}-${s.time}`}
+                          disabled={unavailable}
+                          onClick={() => !unavailable && chooseSchedule(s)}
+                          className={`rounded-xl border px-4 py-3 text-sm font-bold ${
+                            unavailable
+                              ? "cursor-not-allowed border-white/5 bg-zinc-950/60 text-zinc-600"
+                              : selected
+                                ? "border-amber-500 bg-amber-500 text-zinc-950"
+                                : "border-white/10 bg-zinc-950 text-zinc-300 hover:border-amber-500/50"
+                          }`}
+                        >
+                          {s.time} {unavailable ? "· Indisponível" : ""}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -513,6 +669,42 @@ export function Booking() {
           </div>
         </section>
       </main>
+
+      {barberToConfirm && (
+        <Modal title="É este o barbeiro?" onClose={() => setBarberToConfirm(null)}>
+          <div className="text-center">
+            <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-amber-500/10 text-4xl">
+              💈
+            </div>
+            <h2 className="mt-5 text-2xl font-black text-white">{barberToConfirm.name}</h2>
+            <p className="mt-2 text-sm leading-6 text-zinc-400">
+              Você quer continuar o agendamento com este barbeiro?
+            </p>
+            <div className="mt-7 grid gap-3 sm:grid-cols-2">
+              <button
+                onClick={() => setBarberToConfirm(null)}
+                className="rounded-xl border border-white/10 px-4 py-3 font-bold text-zinc-300 hover:bg-white/5"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  setBarberId(barberToConfirm.id);
+                  setServiceIds([]);
+                  setScheduleId(0);
+                  setScheduleTemplateId(0);
+                  setBarberToConfirm(null);
+                  setStep(1);
+                }}
+                className="rounded-xl bg-amber-500 px-4 py-3 font-black text-zinc-950 hover:bg-amber-400"
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
       <PublicFooter />
     </>
   );

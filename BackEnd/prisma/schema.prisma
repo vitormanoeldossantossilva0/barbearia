@@ -16,6 +16,14 @@ enum UserRole {
   BARBER
 }
 
+enum ServiceCategory {
+  CORTE
+  BARBA
+  SOBRANCELHA
+  PINTURA
+  COMBO
+}
+
 model User {
   id       Int     @id @default(autoincrement())
   email    String  @unique
@@ -41,16 +49,31 @@ model Barber {
 }
 
 model Service {
-  id       Int     @id @default(autoincrement())
+  id       Int             @id @default(autoincrement())
   name     String
-  price    Float   @default(0)
+  price    Float           @default(0)
   barberId Int?
+  category ServiceCategory @default(CORTE)
 
   barber       Barber?              @relation(fields: [barberId], references: [id], onDelete: SetNull)
   appointments AppointmentService[]
+  comboItems   ServiceComboItem[]   @relation("ComboService")
+  includedInCombos ServiceComboItem[] @relation("IncludedService")
 
   @@index([barberId])
+  @@index([barberId, category])
   @@unique([barberId, name])
+}
+
+model ServiceComboItem {
+  comboId     Int
+  serviceId   Int
+
+  combo       Service @relation("ComboService", fields: [comboId], references: [id], onDelete: Cascade)
+  service     Service @relation("IncludedService", fields: [serviceId], references: [id], onDelete: Restrict)
+
+  @@id([comboId, serviceId])
+  @@index([serviceId])
 }
 
 // Horários criados pelo barbeiro são modelos de disponibilidade.
