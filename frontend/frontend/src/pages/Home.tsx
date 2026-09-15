@@ -61,7 +61,7 @@ export function Home() {
 
                 <a
                   href="#barbeiros"
-                  className="cursor-pointer rounded-full border border-white/15 px-7 py-3.5 font-bold text-zinc-600 transition hover:bg-white/5 scroll-smooth"
+                  className="cursor-pointer rounded-full border border-white/15 px-7 py-3.5 font-bold text-zinc-600 transition hover:bg-white/5"
                 >
                   Conhecer barbeiros
                 </a>
