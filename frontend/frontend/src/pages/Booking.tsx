@@ -157,9 +157,14 @@ export function Booking() {
         `📅 Data: ${dateFormatter.format(new Date(`${appointmentDate}T12:00:00`))}`,
         `🕐 Horário: ${appointment.schedule.time}`,
         `✂️ Serviços: ${appointment.services.map((item) => item.service.name).join(", ")}`,
-        `💰 Total: R$ ${appointment.services.reduce((sum, item) => sum + item.price, 0).toFixed(2).replace(".", ",")}`,
+        `💰 Total: R$ ${appointment.services
+          .reduce((sum, item) => sum + item.price, 0)
+          .toFixed(2)
+          .replace(".", ",")}`,
         `📱 Telefone: ${appointment.customerPhone}`,
-        ...(appointment.description ? [`📝 Observação: ${appointment.description}`] : []),
+        ...(appointment.description
+          ? [`📝 Observação: ${appointment.description}`]
+          : []),
       ].join("\n");
 
       sessionStorage.setItem(
@@ -177,6 +182,22 @@ export function Booking() {
     } finally {
       setSending(false);
     }
+  };
+
+  const handlePhoneChange = (value: string) => {
+    const numbers = value.replace(/\D/g, "").slice(0, 11);
+
+    let formatted = numbers;
+
+    if (numbers.length > 2) {
+      formatted = `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
+    }
+
+    if (numbers.length > 7) {
+      formatted = `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7)}`;
+    }
+
+    setCustomerPhone(formatted);
   };
 
   if (loading)
@@ -253,7 +274,7 @@ export function Booking() {
               <h2 className="text-2xl font-black text-white">
                 O que você quer fazer?
               </h2>
-              <p className="mt-2 text-zinc-500 ">
+              <p className="mt-2 text-zinc-300 ">
                 Serviços de {selectedBarber?.name}. Selecione um ou mais.
               </p>
               {loadingServices ? (
@@ -278,14 +299,14 @@ export function Booking() {
                               : [...ids, s.id],
                           )
                         }
-                        className={`flex items-center justify-between gap-4 rounded-2xl border p-4 text-left ${selected ? "border-amber-500 bg-amber-500/10" : "border-white/10 bg-zinc-950"}`}
+                        className={` flex items-center justify-between gap-2 w-auto rounded-2xl border p-4 text-left ${selected ? "border-amber-500 bg-amber-500/10" : "border-white/10 bg-zinc-950  *:hover:border-amber-500/50"}`}
                       >
                         <span className="font-bold">{s.name}</span>
-                        <span className="ml-auto text-sm font-bold text-amber-500">
+                        <span className="ml-auto mr-2 text-sm font-bold whitespace-nowrap text-amber-500">
                           R$ {s.price.toFixed(2).replace(".", ",")}
                         </span>
                         <span
-                          className={`grid h-6 w-6 place-items-center rounded-full border text-xs ${selected ? "border-amber-500 bg-amber-500 text-zinc-950" : "border-zinc-700 text-transparent"}`}
+                          className={`shrink-0 grid h-6 w-6 place-items-center rounded-full border text-xs ${selected ? "justify-center items-center border-amber-500 bg-amber-500 text-zinc-950" : "border-zinc-700 text-transparent"}`}
                         >
                           ✓
                         </span>
@@ -301,7 +322,7 @@ export function Booking() {
               <h2 className="text-2xl font-black text-white">
                 Escolha o dia e o horário
               </h2>
-              <p className="mt-2 text-zinc-500">
+              <p className="mt-2 text-zinc-300">
                 O barbeiro mantém os horários disponíveis; você escolhe o dia.
               </p>
               <label className="mt-6 block max-w-xs text-sm font-bold text-white">
@@ -356,7 +377,7 @@ export function Booking() {
           {step === 3 && (
             <div>
               <h2 className="text-2xl font-black text-white">Quase lá.</h2>
-              <p className="mt-2 text-zinc-500">
+              <p className="mt-2 text-zinc-300">
                 Informe seus dados para confirmar o horário.
               </p>
               <div className="mt-7 space-y-5">
@@ -368,6 +389,7 @@ export function Booking() {
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
                     placeholder="Seu nome"
+                    maxLength={32}
                     className="w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-white outline-none focus:border-amber-500"
                   />
                 </label>
@@ -377,7 +399,7 @@ export function Booking() {
                   </span>
                   <input
                     value={customerPhone}
-                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    onChange={(e) => handlePhoneChange(e.target.value)}
                     placeholder="(00) 00000-0000"
                     inputMode="tel"
                     className="w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-white outline-none focus:border-amber-500"
@@ -394,6 +416,7 @@ export function Booking() {
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Alguma preferência ou observação?"
+                    maxLength={150}
                     rows={4}
                     className="w-full resize-y rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-white outline-none focus:border-amber-500"
                   />
@@ -406,8 +429,10 @@ export function Booking() {
           )}
           {step === 4 && (
             <div>
-              <h2 className="text-2xl font-black">Revise antes de confirmar</h2>
-              <p className="mt-2 text-zinc-500">
+              <h2 className="text-2xl font-black text-white">
+                Revise antes de confirmar
+              </h2>
+              <p className="mt-2 text-zinc-300">
                 Confira tudo o que você escolheu.
               </p>
               <div className="mt-7 overflow-hidden rounded-2xl border border-white/10 bg-zinc-950">
@@ -437,7 +462,7 @@ export function Booking() {
                     key={k}
                     className="flex flex-col gap-1 border-b border-white/10 p-4 last:border-b-0 sm:flex-row sm:justify-between"
                   >
-                    <span className="text-sm text-zinc-500">{k}</span>
+                    <span className="text-sm text-zinc-300">{k}</span>
                     <span className="text-sm font-bold text-white sm:max-w-[70%] sm:text-right">
                       {v}
                     </span>

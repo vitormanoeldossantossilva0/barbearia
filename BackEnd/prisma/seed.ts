@@ -6,9 +6,9 @@ async function main() {
   const email = String(process.env.BRUNAO_EMAIL ?? "").trim().toLowerCase();
   const password = String(process.env.BRUNAO_PASSWORD ?? "");
 
-  if (!email || password.length < 8) {
+  if (!email || password.length < 6) {
     throw new Error(
-      "Configure BRUNAO_EMAIL e BRUNAO_PASSWORD (mínimo 8 caracteres) no .env.",
+      "Configure BRUNAO_EMAIL e BRUNAO_PASSWORD (mínimo 6 caracteres) no .env.",
     );
   }
 

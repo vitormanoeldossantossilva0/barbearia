@@ -1,4 +1,5 @@
 import { PublicHeader } from "../components/PublicHeader";
+import { scrollToSection } from "../utils/scrollToSection";
 import { BarberCard } from "../components/BarberCard";
 import { ServiceCard } from "../components/ServiceCard";
 import { SectionTitle } from "../components/SectionTitle";
@@ -35,33 +36,37 @@ export function Home() {
   return (
     <div>
       <PublicHeader />
-      <main>
-        <section id="inicio" className="relative overflow-hidden">
+      <main className="relative overflow-hidden bg-zinc-950">
+        <section id="inicio" className="relative overflow-hidden mr-auto">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_35%,rgba(245,158,11,.16),transparent_35%)]" />
           <div className="mx-auto grid min-h-[680px] max-w-6xl items-center gap-10 px-4 py-20 sm:px-6 md:grid-cols-2">
             <div className="animate-fade-up">
               <p className="mb-5 text-sm font-bold uppercase tracking-[.25em] text-amber-500">
                 Seu estilo começa aqui
               </p>
-              <h1 className="max-w-xl text-5xl font-black leading-[.95] tracking-tight text-black sm:text-7xl ">
+              <h1 className="max-w-xl text-5xl font-black leading-[.95] tracking-tight text-white sm:text-7xl ">
                 Corte bom é aquele que{" "}
                 <span className="text-amber-500">combina com você.</span>
               </h1>
-              <p className="mt-7 max-w-lg text-lg leading-8 text-zinc-400">
+              <p className="mt-7 max-w-lg text-lg leading-8 text-zinc-200">
                 Escolha seu barbeiro, encontre um horário e agende em poucos
                 passos. Sem complicação.
               </p>
-              <div className="relative z-10 mt-9 flex flex-wrap gap-3">
+              <div className="relative z-10 mt-9 flex flex-col items-center gap-3 md:flex-row md:items-center">
                 <Link
                   to="/booking"
-                  className="cursor-pointer rounded-full bg-amber-500 px-7 py-3.5 font-black text-zinc-950 transition hover:bg-amber-400"
+                  className="cursor-pointer rounded-full bg-amber-500 px-7 py-3.5 font-bold text-zinc-950 transition hover:bg-amber-400"
                 >
                   Agendar agora
                 </Link>
 
                 <a
                   href="#barbeiros"
-                  className="cursor-pointer rounded-full border border-white/15 px-7 py-3.5 font-bold text-zinc-600 transition hover:bg-white/5"
+                  className="w-fit cursor-pointer rounded-full border border-white px-7 py-3.5 font-bold text-zinc-200 transition hover:bg-white/5"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToSection("barbeiros");
+                  }}
                 >
                   Conhecer barbeiros
                 </a>
@@ -73,7 +78,7 @@ export function Home() {
               </div>
               <div className="absolute -bottom-5 -left-5 rounded-2xl border border-white/10 bg-zinc-900 p-5 shadow-xl">
                 <p className="text-2xl font-black text-white">100%</p>
-                <p className="text-xs text-zinc-500">foco no seu estilo</p>
+                <p className="text-xs text-zinc-400">foco no seu estilo</p>
               </div>
             </div>
           </div>
@@ -122,7 +127,7 @@ export function Home() {
             <div className="mt-10 text-center">
               <Link
                 to="/booking"
-                className="inline-flex rounded-full bg-amber-500 px-7 py-3.5 font-black text-zinc-950 hover:bg-amber-400"
+                className="inline-flex rounded-full bg-amber-500 px-7 py-3.5 font-bold text-zinc-950 hover:bg-amber-400"
               >
                 Encontrar um horário
               </Link>

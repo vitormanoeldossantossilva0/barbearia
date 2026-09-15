@@ -120,36 +120,37 @@ export function AdminAppointments() {
                     {a.barber.name} · {fmt.format(new Date(a.schedule.date))} às{" "}
                     <strong className="text-white">{a.schedule.time}</strong>
                   </p>
-                  <p className="mt-1 text-xs text-zinc-600">
+                  <p className="mt-1 text-xs text-zinc-600 mr-auto lg:mr-0">
                     {a.customerPhone} ·{" "}
                     {a.services.map((s) => s.service.name).join(", ")}
                   </p>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 m-auto lg:m-0 ">
                   <a
                     href={`/admin/appointments/${a.id}`}
-                    className="rounded-lg bg-white/5 px-3 py-2 text-xs font-bold hover:bg-white/10"
+                    className=" rounded-lg bg-white/5 px-3 py-2 text-xs font-bold hover:bg-white/10 hover:cursor-pointer"
                   >
                     Detalhes
                   </a>
+
                   {a.status === "CONFIRMADO" ? (
                     <button
                       onClick={() => setCancel(a)}
-                      className="rounded-lg bg-red-500/10 px-3 py-2 text-xs font-bold text-red-300"
+                      className="rounded-lg bg-red-500/10 px-3 py-2 text-xs font-bold text-red-300 hover:cursor-pointer"
                     >
                       Cancelar
                     </button>
                   ) : (
                     <button
                       onClick={() => setStatus(a, "CONFIRMADO")}
-                      className="rounded-lg bg-emerald-500/10 px-3 py-2 text-xs font-bold text-emerald-300"
+                      className="rounded-lg bg-emerald-500/10 px-3 py-2 text-xs font-bold text-emerald-300 hover:cursor-pointer"
                     >
                       Reativar
                     </button>
                   )}
                   <button
                     onClick={() => setRemove(a)}
-                    className="rounded-lg bg-zinc-700/40 px-3 py-2 text-xs font-bold text-zinc-300 hover:bg-zinc-700/60"
+                    className="rounded-lg bg-zinc-700/40 px-3 py-2 text-xs font-bold text-zinc-300 hover:bg-zinc-700/60 hover:cursor-pointer"
                   >
                     Excluir
                   </button>

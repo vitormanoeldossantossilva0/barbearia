@@ -8,6 +8,7 @@ export function AdminLogin() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [sending, setSending] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -56,13 +57,22 @@ export function AdminLogin() {
 
         <label className="mt-4 block text-sm font-bold">
           Senha
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+          <div className="relative mt-2">
+            <input
+              type={showPassword ? "text" : "password"}
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             className="mt-2 w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 font-normal outline-none focus:border-amber-500"
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-zinc-400 hover:text-white mt-0.5"
+          >
+            {showPassword ? "Ocultar" : "Mostrar"}
+          </button>
+          </div>
         </label>
 
         <button
