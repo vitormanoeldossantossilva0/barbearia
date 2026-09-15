@@ -8,7 +8,7 @@ export function BarberCard({ barber }: { barber: Barber }) {
         💈
       </div>
       <div className="p-5">
-        <h3 className="text-xl font-bold text-black">{barber.name}</h3>
+        <h3 className="text-xl font-bold text-white">{barber.name}</h3>
         <p className="mt-2 min-h-12 text-sm leading-6 text-zinc-400">
           {barber.description}
         </p>
