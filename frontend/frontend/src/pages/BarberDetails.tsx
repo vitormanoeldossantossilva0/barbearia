@@ -76,7 +76,7 @@ export function BarberDetails() {
       <main className="mx-auto max-w-5xl px-4 py-14 sm:px-6">
         <button
           onClick={() => navigate("/")}
-          className="text-sm text-zinc-500 hover:text-white cursor-pointer"
+          className="text-sm text-zinc-500 hover:text-black cursor-pointer"
         >
           ← Voltar
         </button>
