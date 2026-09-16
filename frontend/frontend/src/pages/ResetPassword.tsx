@@ -1,9 +1,10 @@
 import { type FormEvent, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { authService } from "../services/auth";
 
 export function ResetPassword() {
   const navigate = useNavigate();
+  const { slug = "" } = useParams();
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");
@@ -25,7 +26,7 @@ export function ResetPassword() {
     try {
       const result = await authService.resetPassword(code.trim(), password);
       setSuccess(result.mensagem);
-      setTimeout(() => navigate("/admin/login", { replace: true }), 900);
+      setTimeout(() => navigate(`/${encodeURIComponent(slug)}/admin/login`, { replace: true }), 900);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Não foi possível redefinir a senha.");
     } finally {
@@ -102,7 +103,7 @@ export function ResetPassword() {
         </button>
 
         <Link
-          to="/admin/login"
+          to={`/${encodeURIComponent(slug)}/admin/login`}
           className="mt-4 block text-center text-sm text-zinc-500 hover:text-white"
         >
           ← Voltar para o login

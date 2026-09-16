@@ -21,9 +21,10 @@ const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
 });
 
 export function BarberDetails() {
-  const { id } = useParams();
+  const { id, slug } = useParams();
   const navigate = useNavigate();
   const barberId = Number(id);
+  const shopSlug = slug || "";
   const [barber, setBarber] = useState<Barber | null>(null);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [date, setDate] = useState(today);
@@ -39,7 +40,7 @@ export function BarberDetails() {
     }
 
     barberService
-      .list()
+      .list(shopSlug || undefined)
       .then((barbers) => {
         const foundBarber = barbers.find((item) => item.id === barberId);
 
@@ -51,13 +52,13 @@ export function BarberDetails() {
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
-  }, [barberId]);
+  }, [barberId, shopSlug]);
   useEffect(() => {
     if (!barberId || !date) return;
     setLoadingSchedules(true);
     scheduleService
       .list(barberId, date)
-      .then((items) => setSchedules(items.filter((s) => s.available !== false)))
+      .then(setSchedules)
       .catch((e) => setError(e.message))
       .finally(() => setLoadingSchedules(false));
   }, [barberId, date]);
@@ -65,17 +66,17 @@ export function BarberDetails() {
   if (loading)
     return (
       <>
-        <PublicHeader />
+        <PublicHeader shopSlug={shopSlug || undefined} />
         <Loading />
         <main />
       </>
     );
   return (
     <>
-      <PublicHeader />
+      <PublicHeader shopSlug={shopSlug || undefined} />
       <main className="mx-auto max-w-5xl px-4 py-14 sm:px-6">
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate(shopSlug ? `/${encodeURIComponent(shopSlug)}` : "/")}
           className="text-sm text-zinc-500 hover:text-black cursor-pointer"
         >
           ← Voltar
@@ -88,15 +89,15 @@ export function BarberDetails() {
           barber && (
             <div className="mt-8 grid gap-8 md:grid-cols-[.8fr_1.2fr]">
               <section className="rounded-3xl border border-white/10 bg-zinc-900 p-7">
-                <div className="grid h-44 place-items-center rounded-2xl bg-zinc-950 text-7xl">
-                  💈
+                <div className="h-44 overflow-hidden rounded-2xl bg-zinc-950">
+                  {barber.imageUrl ? <img src={barber.imageUrl} alt={`Foto de ${barber.name}`} className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-7xl">💈</div>}
                 </div>
                 <h1 className="mt-7 text-3xl font-black text-white">{barber.name}</h1>
                 <p className="mt-3 leading-7 text-zinc-400">
                   {barber.description}
                 </p>
                 <button
-                  onClick={() => navigate(`/booking?barber=${barber.id}`)}
+                  onClick={() => navigate(`/${encodeURIComponent(shopSlug)}/booking?barber=${barber.id}`)}
                   className="mt-7 block w-full rounded-xl bg-amber-500 px-5 py-3 text-center font-black text-zinc-950 hover:cursor-pointer"
                 >
                   Agendar com {barber.name.split(" ")[0]}
@@ -139,14 +140,20 @@ export function BarberDetails() {
                       {schedules.map((s) => (
                         <button
                           key={`${s.templateId || s.id}-${s.time}`}
-                          onClick={() =>
+                          disabled={s.available === false}
+                          onClick={() => {
+                            if (s.available === false) return;
                             navigate(
-                              `/booking?barber=${barber.id}&schedule=${s.id || 0}&template=${s.templateId || 0}&date=${date}`,
-                            )
-                          }
-                          className="rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-sm font-bold text-zinc-300 hover:border-amber-500 hover:text-amber-500"
+                              `/${encodeURIComponent(shopSlug)}/booking?barber=${barber.id}&schedule=${s.id || 0}&template=${s.templateId || 0}&date=${date}`,
+                            );
+                          }}
+                          className={`rounded-xl border px-4 py-3 text-sm font-bold ${
+                            s.available === false
+                              ? "cursor-not-allowed border-white/5 bg-zinc-900/60 text-zinc-600"
+                              : "border-white/10 bg-zinc-950 text-zinc-300 hover:border-amber-500 hover:text-amber-500"
+                          }`}
                         >
-                          {s.time} · Agendar
+                          {s.time} {s.available === false ? "· Indisponível" : "· Agendar"}
                         </button>
                       ))}
                     </div>

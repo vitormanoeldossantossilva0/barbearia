@@ -1,32 +1,31 @@
 import { Logo } from "./Logo";
 
-export function PublicHeader() {
+export function PublicHeader({ shopSlug, shopName }: { shopSlug?: string; shopName?: string }) {
+  const homeHref = shopSlug ? `/${encodeURIComponent(shopSlug)}` : "/";
+  const anchor = (section: string) => `${homeHref}#${section}`;
+  const bookingHref = shopSlug
+    ? `/${encodeURIComponent(shopSlug)}/booking`
+    : "/";
+
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-zinc-950/90 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
-        <Logo />
-        <nav className="hidden items-center gap-7 text-sm font-medium text-zinc-300 md:flex">
-          <a href="/#inicio" className="transition hover:text-white">
+    <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-5">
+      <div className="mx-auto flex max-w-6xl items-center justify-between rounded-full border border-white/20 bg-black/20 px-4 py-2.5 shadow-2xl shadow-black/20 backdrop-blur-md sm:px-5">
+        <Logo homeHref={homeHref} name={shopName || "BARBEARIA"} />
+
+        <nav className="hidden items-center gap-1 rounded-full border border-white/20 bg-black/15 p-1 backdrop-blur-md md:flex">
+          <a href={anchor("inicio")} className="rounded-full bg-white/10 px-4 py-2 text-xs font-medium text-white transition hover:bg-amber-500 hover:text-zinc-950">
             Início
           </a>
-          <a href="/#servicos" className="transition hover:text-white">
+          <a href={anchor("servicos")} className="rounded-full px-4 py-2 text-xs font-medium text-zinc-100 transition hover:bg-white/15 hover:text-white">
             Serviços
           </a>
-          <a href="/#barbeiros" className="transition hover:text-white">
+          <a href={anchor("barbeiros")} className="rounded-full px-4 py-2 text-xs font-medium text-zinc-100 transition hover:bg-white/15 hover:text-white">
             Barbeiros
           </a>
-          <a
-            href="/booking"
-            className="rounded-full bg-amber-500 px-5 py-2.5 font-bold text-zinc-950 transition hover:bg-amber-400"
-          >
-            Agendar horário
-          </a>
         </nav>
-        <a
-          href="/booking"
-          className="rounded-full bg-amber-500 px-4 py-2 text-sm font-bold text-zinc-950 md:hidden"
-        >
-          Agendar
+
+        <a href={bookingHref} className="rounded-full bg-amber-500 px-4 py-2.5 text-xs font-black text-zinc-950 transition hover:bg-amber-400 sm:px-5">
+          Agendar horário
         </a>
       </div>
     </header>

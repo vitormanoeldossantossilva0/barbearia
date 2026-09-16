@@ -7,6 +7,8 @@ import barberRoutes from "./Routes/barber.routes";
 import serviceRoutes from "./Routes/services.routes";
 import scheduleRoutes from "./Routes/schedules.routes";
 import appointmentRoutes from "./Routes/appointments.routes";
+import barbershopRoutes from "./Routes/barbershop.routes";
+import serviceTopicRoutes from "./Routes/service-topics.routes";
 
 const app = express();
 
@@ -20,6 +22,8 @@ app.use("/barbers", barberRoutes);
 app.use("/services", serviceRoutes);
 app.use("/schedules", scheduleRoutes);
 app.use("/appointments", appointmentRoutes);
+app.use("/barbershop", barbershopRoutes);
+app.use("/service-topics", serviceTopicRoutes);
 
 const PORT = Number(process.env.PORT || 3333);
 

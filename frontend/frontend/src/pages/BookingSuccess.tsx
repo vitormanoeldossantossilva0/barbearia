@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { PublicHeader } from "../components/PublicHeader";
 
 type WhatsappData = { phone: string; message: string };
 
 export function BookingSuccess() {
   const params = new URLSearchParams(window.location.search);
+  const { slug } = useParams();
+  const shopSlug = slug || params.get("shop") || "";
   const [whatsapp, setWhatsapp] = useState<WhatsappData | null>(null);
 
   useEffect(() => {
@@ -25,7 +27,7 @@ export function BookingSuccess() {
 
   return (
     <>
-      <PublicHeader />
+      <PublicHeader shopSlug={shopSlug || undefined} />
       <main className="mx-auto flex min-h-[70vh] max-w-2xl items-center px-4 py-16 text-center sm:px-6">
         <div className="w-full rounded-3xl border border-emerald-500/20 bg-zinc-900 p-8 sm:p-12">
           <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-emerald-500/15 text-4xl text-emerald-400">
@@ -55,7 +57,7 @@ export function BookingSuccess() {
               </a>
             )}
             <Link
-              to="/"
+              to={shopSlug ? `/${encodeURIComponent(shopSlug)}` : "/"}
               className="rounded-full bg-amber-500 px-7 py-3.5 font-black text-zinc-950 hover:bg-amber-400"
             >
               Voltar para o início

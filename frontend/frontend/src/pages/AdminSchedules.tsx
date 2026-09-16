@@ -31,6 +31,15 @@ export function AdminSchedules() {
   const [deleting, setDeleting] = useState<ScheduleTemplate | null>(null);
   const [time, setTime] = useState("");
 
+  const handleTimeChange = (value: string) => {
+    const digits = value.replace(/\D/g, "").slice(0, 4);
+    if (digits.length <= 2) {
+      setTime(digits);
+      return;
+    }
+    setTime(`${digits.slice(0, 2)}:${digits.slice(2)}`);
+  };
+
   const load = async () => {
     setError("");
     try {
@@ -47,8 +56,13 @@ export function AdminSchedules() {
   }, []);
 
   const create = async () => {
-    if (!time) {
-      setError("Informe o horário.");
+    if (!/^\d{2}:\d{2}$/.test(time)) {
+      setError("Informe o horário no formato HH:MM, por exemplo 09:30.");
+      return;
+    }
+    const [hours, minutes] = time.split(":").map(Number);
+    if (hours > 23 || minutes > 59) {
+      setError("Informe um horário válido entre 00:00 e 23:59.");
       return;
     }
     setSaving(true);
@@ -96,9 +110,13 @@ export function AdminSchedules() {
           <label className="block flex-1 text-sm font-bold">
             Horário
             <input
-              type="time"
+              type="text"
+              inputMode="numeric"
               value={time}
-              onChange={(e) => setTime(e.target.value)}
+              onChange={(e) => handleTimeChange(e.target.value)}
+              placeholder="09:30"
+              maxLength={5}
+              autoComplete="off"
               className="mt-2 w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 font-normal text-white outline-none focus:border-amber-500"
             />
           </label>

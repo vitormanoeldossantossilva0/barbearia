@@ -1,22 +1,72 @@
-import { type FormEvent, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { type FormEvent, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { authService } from "../services/auth";
 
 export function AdminLogin() {
   const navigate = useNavigate();
+  const { slug = "" } = useParams();
+  const shopSlug = slug;
+  const isMasterLogin = !shopSlug;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [sending, setSending] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  useEffect(() => {
+    if (!authService.isAuthenticated(shopSlug)) return;
+
+    authService.me().then((data) => {
+      if (isMasterLogin && data.user.role === "MASTER") {
+        navigate("/master", { replace: true });
+        return;
+      }
+
+      if (!isMasterLogin && data.user.role === "MASTER") {
+        authService.logout();
+        return;
+      }
+
+      if (!isMasterLogin) {
+        const currentShop = data.barbershop?.slug || "";
+        if (currentShop === shopSlug) {
+          navigate(`/${encodeURIComponent(shopSlug)}/admin`, { replace: true });
+        }
+      }
+    }).catch(() => {
+      authService.logout(shopSlug);
+    });
+  }, [navigate, shopSlug]);
+
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     setError("");
     setSending(true);
     try {
-      await authService.login(email.trim(), password);
-      navigate("/admin", { replace: true });
+      const result = await authService.login(email.trim(), password, shopSlug);
+      if (result.user.role === "MASTER") {
+        if (isMasterLogin) {
+          navigate("/master", { replace: true });
+          return;
+        }
+        authService.logout();
+        setError("A conta Master deve entrar pelo acesso Master.");
+        return;
+      }
+
+      if (isMasterLogin) {
+        setError("Esta é a área Master. Use a conta de administrador da plataforma.");
+        return;
+      }
+
+      const loggedShop = result.barbershop?.slug || "";
+      if (loggedShop !== shopSlug) {
+        authService.logout(shopSlug);
+        setError("Esta conta pertence a outra barbearia. Use a conta vinculada a esta slug.");
+        return;
+      }
+
+      navigate(`/${encodeURIComponent(shopSlug)}/admin`, { replace: true });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Não foi possível entrar.");
     } finally {
@@ -31,11 +81,11 @@ export function AdminLogin() {
         className="w-full max-w-md rounded-3xl border border-white/10 bg-zinc-900 p-7 sm:p-9"
       >
         <p className="text-sm font-bold uppercase tracking-[.2em] text-amber-500">
-          Área do barbeiro
+          {isMasterLogin ? "Área Master" : "Área administrativa"}
         </p>
-        <h1 className="mt-2 text-3xl font-black">Entrar no painel</h1>
+        <h1 className="mt-2 text-3xl font-black">{isMasterLogin ? "Entrar no painel Master" : "Entrar no painel"}</h1>
         <p className="mt-2 text-sm text-zinc-500">
-          Use a conta do barbeiro para acessar seus dados.
+          {isMasterLogin ? "Acesso exclusivo para administrar a plataforma e suas barbearias." : "Use a conta da barbearia para acessar o painel correspondente ao link escolhido."}
         </p>
 
         {error && (
@@ -82,14 +132,16 @@ export function AdminLogin() {
           {sending ? "Entrando..." : "Entrar"}
         </button>
 
-        <a
-          href="/admin/redefinir-senha"
-          className="mt-4 block text-center text-sm text-amber-500 hover:text-amber-400"
-        >
-          Esqueci minha senha
-        </a>
+        {!isMasterLogin && (
+          <a
+            href={`/${encodeURIComponent(shopSlug)}/admin/redefinir-senha`}
+            className="mt-4 block text-center text-sm text-amber-500 hover:text-amber-400"
+          >
+            Esqueci minha senha
+          </a>
+        )}
 
-        <a href="/" className="mt-4 block text-center text-sm text-zinc-500 hover:text-white">
+        <a href={isMasterLogin ? "/" : `/${encodeURIComponent(shopSlug)}`} className="mt-4 block text-center text-sm text-zinc-500 hover:text-white">
           ← Voltar para o site
         </a>
       </form>

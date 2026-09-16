@@ -12,49 +12,113 @@ enum AppointmentStatus {
 }
 
 enum UserRole {
+  MASTER
   ADMIN
   BARBER
 }
 
+enum ServiceCategory {
+  CORTE
+  BARBA
+  SOBRANCELHA
+  PINTURA
+  COMBO
+}
+
+model Barbershop {
+  id          Int      @id @default(autoincrement())
+  name        String
+  slug        String   @unique
+  description String   @default("")
+  whatsapp    String?
+  imageUrl    String?
+  instagram   String?
+  facebook    String?
+  tiktok      String?
+  createdAt   DateTime @default(now())
+
+  barbers     Barber[]
+  serviceTopics ServiceTopic[]
+}
+
 model User {
-  id       Int     @id @default(autoincrement())
-  email    String  @unique
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
   password String
   role     UserRole @default(BARBER)
-  barberId Int?    @unique
+  barberId Int?     @unique
 
   barber Barber? @relation(fields: [barberId], references: [id], onDelete: SetNull)
 }
 
 model Barber {
-  id          Int     @id @default(autoincrement())
-  name        String
-  description String
-  slug        String  @unique
-  whatsapp    String?
+  id            Int      @id @default(autoincrement())
+  name          String
+  description   String
+  slug          String   @unique
+  whatsapp      String?
+  imageUrl      String?
+  instagram     String?
+  facebook      String?
+  tiktok        String?
+  barbershopId  Int
 
+  barbershop Barbershop @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
   user         User?
   services     Service[]
   schedules    Schedule[]
   scheduleTemplates ScheduleTemplate[]
   appointments Appointment[]
+
+  @@index([barbershopId])
 }
 
 model Service {
-  id       Int     @id @default(autoincrement())
+  id       Int             @id @default(autoincrement())
   name     String
-  price    Float   @default(0)
+  price    Float           @default(0)
   barberId Int?
+  category ServiceCategory @default(CORTE)
+  topicId Int?
 
   barber       Barber?              @relation(fields: [barberId], references: [id], onDelete: SetNull)
+  topic        ServiceTopic?        @relation(fields: [topicId], references: [id], onDelete: SetNull)
   appointments AppointmentService[]
+  comboItems   ServiceComboItem[]   @relation("ComboService")
+  includedInCombos ServiceComboItem[] @relation("IncludedService")
 
   @@index([barberId])
+  @@index([barberId, category])
+  @@index([topicId])
   @@unique([barberId, name])
 }
 
-// Horários criados pelo barbeiro são modelos de disponibilidade.
-// O cliente escolhe a data; não é necessário cadastrar a data no admin.
+model ServiceTopic {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String   @default("")
+  imageUrl    String?
+  barbershopId Int
+  createdAt   DateTime @default(now())
+
+  barbershop Barbershop @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
+  services   Service[]
+
+  @@unique([barbershopId, name])
+  @@index([barbershopId])
+}
+
+model ServiceComboItem {
+  comboId     Int
+  serviceId   Int
+
+  combo       Service @relation("ComboService", fields: [comboId], references: [id], onDelete: Cascade)
+  service     Service @relation("IncludedService", fields: [serviceId], references: [id], onDelete: Restrict)
+
+  @@id([comboId, serviceId])
+  @@index([serviceId])
+}
+
 model ScheduleTemplate {
   id       Int    @id @default(autoincrement())
   time     String
@@ -67,8 +131,6 @@ model ScheduleTemplate {
   @@unique([barberId, time])
 }
 
-// Schedule continua representando uma ocorrência concreta de um horário.
-// Os registros antigos continuam válidos; os novos são criados quando o cliente reserva uma data.
 model Schedule {
   id          Int       @id @default(autoincrement())
   date        DateTime

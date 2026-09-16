@@ -1,4 +1,19 @@
 export type AppointmentStatus = "CONFIRMADO" | "CANCELADO";
+export type ServiceCategory = "CORTE" | "BARBA" | "SOBRANCELHA" | "PINTURA" | "COMBO";
+
+export interface Barbershop {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  whatsapp?: string | null;
+  imageUrl?: string | null;
+  instagram?: string | null;
+  facebook?: string | null;
+  tiktok?: string | null;
+  createdAt?: string;
+  barbers?: Barber[];
+}
 
 export interface Barber {
   id: number;
@@ -6,16 +21,36 @@ export interface Barber {
   description: string;
   slug: string;
   whatsapp?: string | null;
+  imageUrl?: string | null;
+  instagram?: string | null;
+  facebook?: string | null;
+  tiktok?: string | null;
+  barbershopId?: number;
   schedules?: Schedule[];
 }
 
 export interface BarberAccount extends Barber {
-  user?: { email: string; role?: "ADMIN" | "BARBER" };
+  user?: { email: string; role?: "MASTER" | "ADMIN" | "BARBER" };
 }
+
+export interface AuthUser { id: number; email: string; role: "MASTER" | "ADMIN" | "BARBER"; barbershopId?: number | null; }
 
 export interface AuthResponse {
   token: string;
-  barber: BarberAccount;
+  user: AuthUser;
+  barber: BarberAccount | null;
+  barbershop: Barbershop | null;
+}
+
+export interface MasterBarbershop extends Barbershop {
+  _count?: { barbers: number };
+}
+
+
+export interface ServiceComboItem {
+  comboId: number;
+  serviceId: number;
+  service: Service;
 }
 
 export interface Service {
@@ -23,6 +58,20 @@ export interface Service {
   name: string;
   price: number;
   barberId?: number | null;
+  category: ServiceCategory;
+  topicId?: number | null;
+  topic?: ServiceTopic | null;
+  comboItems?: ServiceComboItem[];
+}
+
+export interface ServiceTopic {
+  id: number;
+  name: string;
+  description: string;
+  imageUrl?: string | null;
+  barbershopId?: number;
+  services?: Service[];
+  _count?: { services: number };
 }
 
 export interface Schedule {

@@ -11,24 +11,26 @@ export function Modal({
 }) {
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/70 p-3 backdrop-blur-sm sm:p-4"
       onMouseDown={onClose}
     >
       <div
-        className="w-full max-w-lg rounded-2xl border border-white/10 bg-zinc-900 p-6 shadow-2xl"
+        className="my-auto flex max-h-[calc(100dvh-1.5rem)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-white/10 bg-zinc-900 shadow-2xl sm:max-h-[calc(100dvh-2rem)]"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="mb-5 flex items-center justify-between gap-4">
-          <h2 className="text-lg font-bold text-white">{title}</h2>
+        <div className="flex shrink-0 items-center justify-between gap-4 border-b border-white/10 px-6 py-4">
+          <h2 className="min-w-0 text-lg font-bold text-white">{title}</h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-2 text-zinc-400 hover:bg-white/10 hover:text-white"
+            className="shrink-0 rounded-lg p-2 text-zinc-400 hover:bg-white/10 hover:text-white"
             aria-label="Fechar"
           >
             ✕
           </button>
         </div>
-        {children}
+        <div className="min-h-0 overflow-y-auto px-6 py-5 scrollbar-invisible">
+          {children}
+        </div>
       </div>
     </div>
   );

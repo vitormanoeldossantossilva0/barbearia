@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 import { AdminLayout } from "../components/AdminLayout";
 import { Loading } from "../components/Loading";
 import { ConfirmDialog } from "../components/ConfirmDialog";
@@ -11,6 +12,9 @@ const fmt = new Intl.DateTimeFormat("pt-BR", {
   year: "numeric",
 });
 export function AdminAppointments() {
+  const { slug = "" } = useParams();
+  const shopSlug = slug;
+  const adminPath = (path: string) => `/${encodeURIComponent(shopSlug)}${path}`;
   const [items, setItems] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -127,7 +131,7 @@ export function AdminAppointments() {
                 </div>
                 <div className="flex flex-wrap gap-2 m-auto lg:m-0 ">
                   <a
-                    href={`/admin/appointments/${a.id}`}
+                    href={adminPath(`/admin/appointments/${a.id}`)}
                     className=" rounded-lg bg-white/5 px-3 py-2 text-xs font-bold hover:bg-white/10 hover:cursor-pointer"
                   >
                     Detalhes

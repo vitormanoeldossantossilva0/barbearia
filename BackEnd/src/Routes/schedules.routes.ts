@@ -137,11 +137,21 @@ router.get("/mine", authMiddleware, async (req, res) => {
 });
 
 // Cria somente o horário. A data será escolhida pelo cliente.
+// O sistema trabalha somente com HH:MM (sem segundos).
 router.post("/", authMiddleware, async (req, res) => {
   try {
-    const time = String(req.body.time ?? "").trim();
+    if (typeof req.auth?.barberId !== "number") {
+      return res.status(403).json({ mensagem: "Esta conta não possui um barbeiro vinculado." });
+    }
+
+    let time = String(req.body.time ?? "").trim();
+    // Aceita HH:MM:SS somente para compatibilidade com dados/clientes antigos,
+    // mas normaliza imediatamente para HH:MM antes de salvar.
+    const withSeconds = /^(\d{2}):(\d{2}):(\d{2})$/.exec(time);
+    if (withSeconds) time = `${withSeconds[1]}:${withSeconds[2]}`;
+
     if (!/^\d{2}:\d{2}$/.test(time)) {
-      return res.status(400).json({ mensagem: "Informe um horário válido." });
+      return res.status(400).json({ mensagem: "Informe o horário no formato HH:MM." });
     }
     const [hours, minutes] = time.split(":").map(Number);
     if (hours > 23 || minutes > 59) {
@@ -149,12 +159,12 @@ router.post("/", authMiddleware, async (req, res) => {
     }
 
     const exists = await prisma.scheduleTemplate.findUnique({
-      where: { barberId_time: { barberId: req.auth!.barberId, time } },
+      where: { barberId_time: { barberId: req.auth.barberId, time } },
     });
     if (exists) return res.status(409).json({ mensagem: "Esse horário já está cadastrado." });
 
     const template = await prisma.scheduleTemplate.create({
-      data: { time, barberId: req.auth!.barberId },
+      data: { time, barberId: req.auth.barberId },
     });
     return res.status(201).json(template);
   } catch (error) {

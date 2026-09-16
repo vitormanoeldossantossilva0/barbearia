@@ -14,14 +14,16 @@ async function main() {
 
   const passwordHash = await bcrypt.hash(password, 12);
 
-  const barber = await prisma.barber.upsert({
+  const shop = await prisma.barbershop.upsert({
     where: { slug: "brunao" },
     update: {},
-    create: {
-      name: "Brunão",
-      description: "Barbeiro",
-      slug: "brunao",
-    },
+    create: { name: "Barbearia do Brunão", slug: "brunao", description: "Seu estilo começa aqui." },
+  });
+
+  const barber = await prisma.barber.upsert({
+    where: { slug: "brunao" },
+    update: { barbershopId: shop.id },
+    create: { name: "Brunão", description: "Barbeiro", slug: "brunao", barbershopId: shop.id },
   });
 
   await prisma.user.upsert({
@@ -30,21 +32,62 @@ async function main() {
     create: { email, password: passwordHash, barberId: barber.id, role: "ADMIN" },
   });
 
+  const topicDefaults = [
+    ["Cortes", "Cabelo, degradê, social e outros estilos."],
+    ["Barba", "Serviços de barba e acabamento."],
+    ["Sobrancelha", "Cuidados e acabamento de sobrancelhas."],
+    ["Pinturas", "Pintura, platinado, luzes e outras técnicas."],
+  ] as const;
+  const topics = new Map<string, number>();
+  for (const [name, description] of topicDefaults) {
+    const topic = await prisma.serviceTopic.upsert({
+      where: { barbershopId_name: { barbershopId: shop.id, name } },
+      update: { description },
+      create: { name, description, barbershopId: shop.id },
+    });
+    topics.set(name, topic.id);
+  }
+
   const defaults = [
-    ["Cabelo", 30],
-    ["Barba", 25],
-    ["Sobrancelha", 15],
-    ["Pintura", 50],
+    ["Cabelo", 30, "CORTE", "Cortes"],
+    ["Barba", 25, "BARBA", "Barba"],
+    ["Sobrancelha", 15, "SOBRANCELHA", "Sobrancelha"],
+    ["Pintura", 50, "PINTURA", "Pinturas"],
   ] as const;
 
-  for (const [name, price] of defaults) {
+  for (const [name, price, category, topicName] of defaults) {
     const existing = await prisma.service.findFirst({
-      where: { barberId: barber.id, name },
+      where: {
+        barberId: barber.id,
+        name: { equals: name, mode: "insensitive" },
+      },
     });
 
-    if (!existing) {
+    if (existing) {
+      await prisma.service.update({
+        where: { id: existing.id },
+        data: { price, category, barberId: barber.id, topicId: topics.get(topicName) },
+      });
+      continue;
+    }
+
+    // Aproveita um serviço legado sem barbeiro, quando existir, em vez de
+    // criar um segundo registro invisível na área administrativa.
+    const legacy = await prisma.service.findFirst({
+      where: {
+        barberId: null,
+        name: { equals: name, mode: "insensitive" },
+      },
+    });
+
+    if (legacy) {
+      await prisma.service.update({
+        where: { id: legacy.id },
+        data: { price, category, barberId: barber.id, topicId: topics.get(topicName) },
+      });
+    } else {
       await prisma.service.create({
-        data: { name, price, barberId: barber.id },
+        data: { name, price, category, barberId: barber.id, topicId: topics.get(topicName) },
       });
     }
   }
@@ -56,6 +99,19 @@ async function main() {
       update: {},
       create: { barberId: barber.id, time },
     });
+  }
+
+  const masterEmail = String(process.env.MASTER_EMAIL ?? "").trim().toLowerCase();
+  const masterPassword = String(process.env.MASTER_PASSWORD ?? "");
+  if (masterEmail && masterPassword.length >= 8) {
+    await prisma.user.upsert({
+      where: { email: masterEmail },
+      update: { password: await bcrypt.hash(masterPassword, 12), role: "MASTER", barberId: null },
+      create: { email: masterEmail, password: await bcrypt.hash(masterPassword, 12), role: "MASTER" },
+    });
+    console.log(`Conta master criada/atualizada: ${masterEmail}`);
+  } else {
+    console.log("MASTER_EMAIL/MASTER_PASSWORD não configurados; nenhuma conta master foi alterada.");
   }
 
   console.log(`Conta inicial criada/atualizada: ${email}`);

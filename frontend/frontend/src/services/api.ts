@@ -15,7 +15,10 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const token = localStorage.getItem("barbearia_token");
+  const adminMatch = window.location.pathname.match(/^\/([^/]+)\/admin(?:\/|$)/);
+  const slug = adminMatch?.[1] ? decodeURIComponent(adminMatch[1]).trim().toLowerCase() : "";
+  const tokenKey = slug ? `barbearia_token_${slug}` : "barbearia_token_master";
+  const token = localStorage.getItem(tokenKey);
   const headers: HeadersInit = {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { AdminLayout } from "../components/AdminLayout";
+import { useParams } from "react-router-dom";
 import { Loading } from "../components/Loading";
 import { appointmentService } from "../services/appointments";
 import type { Appointment } from "../types";
@@ -12,6 +13,9 @@ const fmt = new Intl.DateTimeFormat("pt-BR", {
 });
 export function AdminAppointmentDetails() {
   const id = window.location.pathname.split("/").filter(Boolean).pop();
+  const { slug = "" } = useParams();
+  const shopSlug = slug;
+  const adminPath = (path: string) => `/${encodeURIComponent(shopSlug)}${path}`;
   const [item, setItem] = useState<Appointment>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -25,7 +29,7 @@ export function AdminAppointmentDetails() {
   return (
     <AdminLayout>
       <a
-        href="/admin/appointments"
+        href={adminPath("/admin/appointments")}
         className="text-sm text-zinc-500 hover:text-white"
       >
         ← Voltar aos agendamentos
