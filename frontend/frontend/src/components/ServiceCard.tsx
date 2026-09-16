@@ -1,6 +1,12 @@
 import type { Service } from "../types";
 
-export function ServiceCard({ service, showPrice = true }: { service: Service; showPrice?: boolean }) {
+export function ServiceCard({
+  service,
+  showPrice = true,
+}: {
+  service: Service;
+  showPrice?: boolean;
+}) {
   const isCombo = service.category === "COMBO";
   return (
     <article className="rounded-2xl border border-white/10 bg-zinc-900/85 p-5 backdrop-blur-sm">

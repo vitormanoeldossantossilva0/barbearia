@@ -9,7 +9,9 @@ export type SaveServiceTopicPayload = {
 
 export const serviceTopicService = {
   public: (slug: string) =>
-    api.get<ServiceTopic[]>(`/service-topics/public/${encodeURIComponent(slug)}`),
+    api.get<ServiceTopic[]>(
+      `/service-topics/public/${encodeURIComponent(slug)}`,
+    ),
   mine: () => api.get<ServiceTopic[]>("/service-topics/mine"),
   create: (data: SaveServiceTopicPayload) =>
     api.post<ServiceTopic>("/service-topics", data),

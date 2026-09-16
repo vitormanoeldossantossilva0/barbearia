@@ -232,7 +232,9 @@ export function AdminBarbers() {
                 ) : null}
                 <div className="min-w-0 flex-1">
                   <p className="text-xs uppercase tracking-widest text-zinc-600">
-                    {barber.user?.role === "ADMIN" ? "Administrador" : "Barbeiro"}
+                    {barber.user?.role === "ADMIN"
+                      ? "Administrador"
+                      : "Barbeiro"}
                   </p>
                   <h3 className="mt-2 text-2xl font-black">{barber.name}</h3>
                   <p className="mt-2 text-sm text-zinc-500">
@@ -253,7 +255,9 @@ export function AdminBarbers() {
                 </p>
                 <p>
                   <span className="font-bold text-zinc-300">WhatsApp:</span>{" "}
-                  {barber.whatsapp ? formatPhone(barber.whatsapp) : "Não configurado"}
+                  {barber.whatsapp
+                    ? formatPhone(barber.whatsapp)
+                    : "Não configurado"}
                 </p>
               </div>
             </article>
@@ -288,7 +292,9 @@ export function AdminBarbers() {
               WhatsApp
               <input
                 value={form.whatsapp}
-                onChange={(e) => updateField("whatsapp", formatPhone(e.target.value))}
+                onChange={(e) =>
+                  updateField("whatsapp", formatPhone(e.target.value))
+                }
                 placeholder="(12) 99999-9999"
                 inputMode="tel"
                 maxLength={15}
@@ -315,15 +321,36 @@ export function AdminBarbers() {
               />
             </label>
             <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[.02] p-4">
-              <p className="text-sm font-bold">Redes sociais <span className="font-normal text-zinc-500">(opcional)</span></p>
-              <label className="block text-xs font-bold text-zinc-400">Instagram
-                <input value={form.instagram} onChange={(e) => updateField("instagram", e.target.value)} placeholder="https://instagram.com/seuperfil" className="mt-1.5 w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-sm font-normal outline-none focus:border-amber-500" />
+              <p className="text-sm font-bold">
+                Redes sociais{" "}
+                <span className="font-normal text-zinc-500">(opcional)</span>
+              </p>
+              <label className="block text-xs font-bold text-zinc-400">
+                Instagram
+                <input
+                  value={form.instagram}
+                  onChange={(e) => updateField("instagram", e.target.value)}
+                  placeholder="https://instagram.com/seuperfil"
+                  className="mt-1.5 w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-sm font-normal outline-none focus:border-amber-500"
+                />
               </label>
-              <label className="block text-xs font-bold text-zinc-400">Facebook
-                <input value={form.facebook} onChange={(e) => updateField("facebook", e.target.value)} placeholder="https://facebook.com/seuperfil" className="mt-1.5 w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-sm font-normal outline-none focus:border-amber-500" />
+              <label className="block text-xs font-bold text-zinc-400">
+                Facebook
+                <input
+                  value={form.facebook}
+                  onChange={(e) => updateField("facebook", e.target.value)}
+                  placeholder="https://facebook.com/seuperfil"
+                  className="mt-1.5 w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-sm font-normal outline-none focus:border-amber-500"
+                />
               </label>
-              <label className="block text-xs font-bold text-zinc-400">TikTok
-                <input value={form.tiktok} onChange={(e) => updateField("tiktok", e.target.value)} placeholder="https://tiktok.com/@seuperfil" className="mt-1.5 w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-sm font-normal outline-none focus:border-amber-500" />
+              <label className="block text-xs font-bold text-zinc-400">
+                TikTok
+                <input
+                  value={form.tiktok}
+                  onChange={(e) => updateField("tiktok", e.target.value)}
+                  placeholder="https://tiktok.com/@seuperfil"
+                  className="mt-1.5 w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-sm font-normal outline-none focus:border-amber-500"
+                />
               </label>
             </div>
 
@@ -374,7 +401,9 @@ export function AdminBarbers() {
               WhatsApp
               <input
                 value={form.whatsapp}
-                onChange={(e) => updateField("whatsapp", formatPhone(e.target.value))}
+                onChange={(e) =>
+                  updateField("whatsapp", formatPhone(e.target.value))
+                }
                 placeholder="(12) 99999-9999"
                 inputMode="tel"
                 maxLength={15}
@@ -391,7 +420,8 @@ export function AdminBarbers() {
               />
             </label>
             <label className="block text-sm font-bold">
-              Nova senha <span className="font-normal text-zinc-500">(opcional)</span>
+              Nova senha{" "}
+              <span className="font-normal text-zinc-500">(opcional)</span>
               <input
                 type="password"
                 value={form.password}
@@ -401,15 +431,36 @@ export function AdminBarbers() {
               />
             </label>
             <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[.02] p-4">
-              <p className="text-sm font-bold">Redes sociais <span className="font-normal text-zinc-500">(opcional)</span></p>
-              <label className="block text-xs font-bold text-zinc-400">Instagram
-                <input value={form.instagram} onChange={(e) => updateField("instagram", e.target.value)} placeholder="https://instagram.com/seuperfil" className="mt-1.5 w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-sm font-normal outline-none focus:border-amber-500" />
+              <p className="text-sm font-bold">
+                Redes sociais{" "}
+                <span className="font-normal text-zinc-500">(opcional)</span>
+              </p>
+              <label className="block text-xs font-bold text-zinc-400">
+                Instagram
+                <input
+                  value={form.instagram}
+                  onChange={(e) => updateField("instagram", e.target.value)}
+                  placeholder="https://instagram.com/seuperfil"
+                  className="mt-1.5 w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-sm font-normal outline-none focus:border-amber-500"
+                />
               </label>
-              <label className="block text-xs font-bold text-zinc-400">Facebook
-                <input value={form.facebook} onChange={(e) => updateField("facebook", e.target.value)} placeholder="https://facebook.com/seuperfil" className="mt-1.5 w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-sm font-normal outline-none focus:border-amber-500" />
+              <label className="block text-xs font-bold text-zinc-400">
+                Facebook
+                <input
+                  value={form.facebook}
+                  onChange={(e) => updateField("facebook", e.target.value)}
+                  placeholder="https://facebook.com/seuperfil"
+                  className="mt-1.5 w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-sm font-normal outline-none focus:border-amber-500"
+                />
               </label>
-              <label className="block text-xs font-bold text-zinc-400">TikTok
-                <input value={form.tiktok} onChange={(e) => updateField("tiktok", e.target.value)} placeholder="https://tiktok.com/@seuperfil" className="mt-1.5 w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-sm font-normal outline-none focus:border-amber-500" />
+              <label className="block text-xs font-bold text-zinc-400">
+                TikTok
+                <input
+                  value={form.tiktok}
+                  onChange={(e) => updateField("tiktok", e.target.value)}
+                  placeholder="https://tiktok.com/@seuperfil"
+                  className="mt-1.5 w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-sm font-normal outline-none focus:border-amber-500"
+                />
               </label>
             </div>
 
@@ -431,16 +482,18 @@ export function AdminBarbers() {
               {saving ? "Salvando..." : "Salvar alterações"}
             </button>
 
-            {isAdmin && editing.id !== me?.id && editing.user?.role === "BARBER" && (
-              <button
-                type="button"
-                disabled={saving || deleting}
-                onClick={deleteBarber}
-                className="w-full rounded-xl border border-red-500/30 bg-red-500/10 py-3 font-black text-red-300 transition hover:bg-red-500/20 disabled:opacity-50"
-              >
-                {deleting ? "Excluindo..." : "Excluir barbeiro"}
-              </button>
-            )}
+            {isAdmin &&
+              editing.id !== me?.id &&
+              editing.user?.role === "BARBER" && (
+                <button
+                  type="button"
+                  disabled={saving || deleting}
+                  onClick={deleteBarber}
+                  className="w-full rounded-xl border border-red-500/30 bg-red-500/10 py-3 font-black text-red-300 transition hover:bg-red-500/20 disabled:opacity-50"
+                >
+                  {deleting ? "Excluindo..." : "Excluir barbeiro"}
+                </button>
+              )}
           </div>
         </Modal>
       )}

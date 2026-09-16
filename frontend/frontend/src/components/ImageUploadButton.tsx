@@ -25,7 +25,9 @@ export function ImageUploadButton({
     try {
       onChange(await fileToDataUrl(file));
     } catch (error) {
-      errorMessage?.(error instanceof Error ? error.message : "Erro ao carregar a imagem.");
+      errorMessage?.(
+        error instanceof Error ? error.message : "Erro ao carregar a imagem.",
+      );
     } finally {
       setLoading(false);
       event.target.value = "";

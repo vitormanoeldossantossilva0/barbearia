@@ -22,7 +22,14 @@ export function SocialLinks({
       label: "Instagram",
       href: instagram,
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={iconClass} aria-hidden="true">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          className={iconClass}
+          aria-hidden="true"
+        >
           <rect x="3" y="3" width="18" height="18" rx="5" />
           <circle cx="12" cy="12" r="4" />
           <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
@@ -46,7 +53,13 @@ export function SocialLinks({
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {label && <span className={`mr-1 text-xs font-bold uppercase tracking-[.16em] ${light ? "text-zinc-400" : "text-zinc-500"}`}>{label}</span>}
+      {label && (
+        <span
+          className={`mr-1 text-xs font-bold uppercase tracking-[.16em] ${light ? "text-zinc-400" : "text-zinc-500"}`}
+        >
+          {label}
+        </span>
+      )}
       {visible.map((link) => (
         <a
           key={link.label}

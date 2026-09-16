@@ -41,7 +41,8 @@ export function BookingSuccess() {
           </h1>
           <p className="mx-auto mt-4 max-w-md leading-7 text-zinc-400">
             Tudo certo! Seu agendamento foi registrado com sucesso. Guarde o
-            número <strong className="text-white">#{params.get("id") || "—"}</strong>{" "}
+            número{" "}
+            <strong className="text-white">#{params.get("id") || "—"}</strong>{" "}
             para referência.
           </p>
 

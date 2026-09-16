@@ -63,7 +63,10 @@ export function AdminDashboard() {
       {loading ? (
         <Loading />
       ) : error ? (
-        <div role="alert" className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-red-400">
+        <div
+          role="alert"
+          className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-red-400"
+        >
           {error}
         </div>
       ) : (
@@ -72,8 +75,16 @@ export function AdminDashboard() {
             {[
               ["Barbeiros", data.barbers, adminPath("/admin/barbers")],
               ["Meus serviços", data.services, adminPath("/admin/services")],
-              ["Horários livres", data.schedules, adminPath("/admin/schedules")],
-              ["Agendamentos de hoje", data.appointments, adminPath("/admin/appointments")],
+              [
+                "Horários livres",
+                data.schedules,
+                adminPath("/admin/schedules"),
+              ],
+              [
+                "Agendamentos de hoje",
+                data.appointments,
+                adminPath("/admin/appointments"),
+              ],
             ].map(([label, value, to]) => (
               <Link
                 key={String(to)}
@@ -89,8 +100,12 @@ export function AdminDashboard() {
           <section className="mt-8 rounded-3xl border border-white/10 bg-zinc-900 p-6">
             <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[.2em] text-amber-500">Agenda rápida</p>
-                <h2 className="mt-1 text-2xl font-black">Agendamentos de hoje</h2>
+                <p className="text-xs font-bold uppercase tracking-[.2em] text-amber-500">
+                  Agenda rápida
+                </p>
+                <h2 className="mt-1 text-2xl font-black">
+                  Agendamentos de hoje
+                </h2>
               </div>
               <p className="text-sm capitalize text-zinc-500">
                 {todayLabel.format(new Date(`${today}T12:00:00`))}
@@ -106,7 +121,9 @@ export function AdminDashboard() {
                 >
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-lg font-black text-white">{appointment.schedule.time}</span>
+                      <span className="text-lg font-black text-white">
+                        {appointment.schedule.time}
+                      </span>
                       <span
                         className={`rounded-full px-2 py-1 text-[10px] font-bold ${
                           appointment.status === "CONFIRMADO"
@@ -114,21 +131,33 @@ export function AdminDashboard() {
                             : "bg-red-500/10 text-red-300"
                         }`}
                       >
-                        {appointment.status === "CONFIRMADO" ? "Confirmado" : "Cancelado"}
+                        {appointment.status === "CONFIRMADO"
+                          ? "Confirmado"
+                          : "Cancelado"}
                       </span>
                     </div>
-                    <p className="mt-1 font-bold text-zinc-200">{appointment.customerName}</p>
+                    <p className="mt-1 font-bold text-zinc-200">
+                      {appointment.customerName}
+                    </p>
                     <p className="mt-1 text-xs text-zinc-500">
-                      {appointment.services.map((item) => item.service.name).join(" + ")}
+                      {appointment.services
+                        .map((item) => item.service.name)
+                        .join(" + ")}
                     </p>
                   </div>
-                  <span className="text-xs font-bold text-zinc-500">Ver detalhes →</span>
+                  <span className="text-xs font-bold text-zinc-500">
+                    Ver detalhes →
+                  </span>
                 </Link>
               ))}
               {todayAppointments.length === 0 && (
                 <div className="rounded-2xl border border-dashed border-white/10 p-8 text-center">
-                  <p className="font-bold text-zinc-300">Nenhum agendamento para hoje.</p>
-                  <p className="mt-1 text-sm text-zinc-600">Quando um cliente reservar um horário, ele aparecerá aqui.</p>
+                  <p className="font-bold text-zinc-300">
+                    Nenhum agendamento para hoje.
+                  </p>
+                  <p className="mt-1 text-sm text-zinc-600">
+                    Quando um cliente reservar um horário, ele aparecerá aqui.
+                  </p>
                 </div>
               )}
             </div>

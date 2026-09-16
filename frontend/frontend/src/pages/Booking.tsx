@@ -48,15 +48,21 @@ const categoryLabel: Record<ServiceCategory, string> = {
   COMBO: "Combo",
 };
 
-const normalCategoryGroups: Array<{ title: string; description: string; categories: ServiceCategory[] }> = [
+const normalCategoryGroups: Array<{
+  title: string;
+  description: string;
+  categories: ServiceCategory[];
+}> = [
   {
     title: "Cortes e cuidados",
-    description: "Escolha uma opção de cada tipo. Assim você não precisa marcar dois estilos de corte ao mesmo tempo.",
+    description:
+      "Escolha uma opção de cada tipo. Assim você não precisa marcar dois estilos de corte ao mesmo tempo.",
     categories: ["CORTE", "BARBA", "SOBRANCELHA"],
   },
   {
     title: "Pinturas",
-    description: "Platinado, luzes, pintura e outras técnicas ficam em uma categoria própria.",
+    description:
+      "Platinado, luzes, pintura e outras técnicas ficam em uma categoria própria.",
     categories: ["PINTURA"],
   },
 ];
@@ -133,7 +139,9 @@ export function Booking() {
         }
         if (
           initialTemplateId &&
-          items.some((s) => s.templateId === initialTemplateId && s.available !== false)
+          items.some(
+            (s) => s.templateId === initialTemplateId && s.available !== false,
+          )
         ) {
           setScheduleTemplateId(initialTemplateId);
         }
@@ -144,10 +152,16 @@ export function Booking() {
 
   const selectedBarber = barbers.find((b) => b.id === barberId);
   const selectedSchedule =
-    schedules.find((s) => s.available !== false && s.id === scheduleId && !s.templateId) ??
-    schedules.find((s) => s.available !== false && s.templateId === scheduleTemplateId);
+    schedules.find(
+      (s) => s.available !== false && s.id === scheduleId && !s.templateId,
+    ) ??
+    schedules.find(
+      (s) => s.available !== false && s.templateId === scheduleTemplateId,
+    );
   const selectedServices = services.filter((s) => serviceIds.includes(s.id));
-  const selectedCombo = selectedServices.find((service) => service.category === "COMBO");
+  const selectedCombo = selectedServices.find(
+    (service) => service.category === "COMBO",
+  );
   const comboCategories = new Set(
     selectedCombo?.comboItems?.map((item) => item.service.category) ?? [],
   );
@@ -182,7 +196,13 @@ export function Booking() {
         const existing = services.find((item) => item.id === id);
         if (!existing) return false;
         if (existing.category === service.category) return false;
-        if (existing.category === "COMBO" && existing.comboItems?.some((item) => item.service.category === service.category)) return false;
+        if (
+          existing.category === "COMBO" &&
+          existing.comboItems?.some(
+            (item) => item.service.category === service.category,
+          )
+        )
+          return false;
         return true;
       });
       return [...next, service.id];
@@ -243,7 +263,9 @@ export function Booking() {
         JSON.stringify({ phone: whatsapp, message: whatsappMessage }),
       );
 
-      window.location.assign(`/${encodeURIComponent(shopSlug)}/booking/success?id=${appointment.id}`);
+      window.location.assign(
+        `/${encodeURIComponent(shopSlug)}/booking/success?id=${appointment.id}`,
+      );
     } catch (e) {
       setError(
         e instanceof Error
@@ -328,41 +350,61 @@ export function Booking() {
                 O que você quer fazer?
               </h2>
               <p className="mt-2 text-zinc-300">
-                Serviços de {selectedBarber?.name}. Escolha as opções que realmente fazem sentido juntas.
+                Serviços de {selectedBarber?.name}. Escolha as opções que
+                realmente fazem sentido juntas.
               </p>
               {loadingServices ? (
                 <Loading text="Carregando serviços..." />
               ) : services.length === 0 ? (
                 <div className="mt-7">
-                  <Alert>Este barbeiro ainda não possui serviços cadastrados.</Alert>
+                  <Alert>
+                    Este barbeiro ainda não possui serviços cadastrados.
+                  </Alert>
                 </div>
               ) : (
                 <div className="mt-7 space-y-8">
                   {normalCategoryGroups.map((group) => (
                     <section key={group.title}>
-                      <h3 className="text-lg font-black text-white">{group.title}</h3>
-                      <p className="mt-1 text-sm leading-6 text-zinc-500">{group.description}</p>
+                      <h3 className="text-lg font-black text-white">
+                        {group.title}
+                      </h3>
+                      <p className="mt-1 text-sm leading-6 text-zinc-500">
+                        {group.description}
+                      </p>
 
                       <div className="mt-5 space-y-6">
                         {group.categories.map((category) => {
-                          const categoryServices = services.filter((service) => service.category === category);
+                          const categoryServices = services.filter(
+                            (service) => service.category === category,
+                          );
                           if (categoryServices.length === 0) return null;
-                          const categorySelected = selectedServices.some((service) => service.category === category);
+                          const categorySelected = selectedServices.some(
+                            (service) => service.category === category,
+                          );
 
                           return (
                             <div key={category}>
                               <div className="mb-2 flex items-center justify-between gap-3">
-                                <p className="text-sm font-bold text-zinc-300">{categoryLabel[category]}</p>
+                                <p className="text-sm font-bold text-zinc-300">
+                                  {categoryLabel[category]}
+                                </p>
                                 {categorySelected && (
-                                  <span className="text-xs font-bold text-amber-500">1 opção selecionada</span>
+                                  <span className="text-xs font-bold text-amber-500">
+                                    1 opção selecionada
+                                  </span>
                                 )}
                               </div>
                               <div className="grid gap-3">
                                 {categoryServices.map((service) => {
-                                  const selected = serviceIds.includes(service.id);
-                                  const blockedByCombo = !selected && comboCategories.has(category);
-                                  const blockedByCategory = !selected && categorySelected;
-                                  const disabled = blockedByCombo || blockedByCategory;
+                                  const selected = serviceIds.includes(
+                                    service.id,
+                                  );
+                                  const blockedByCombo =
+                                    !selected && comboCategories.has(category);
+                                  const blockedByCategory =
+                                    !selected && categorySelected;
+                                  const disabled =
+                                    blockedByCombo || blockedByCategory;
                                   return (
                                     <button
                                       key={service.id}
@@ -378,18 +420,27 @@ export function Booking() {
                                       }`}
                                     >
                                       <div className="min-w-0">
-                                        <span className="block font-bold text-white">{service.name}</span>
+                                        <span className="block font-bold text-white">
+                                          {service.name}
+                                        </span>
                                         {disabled && (
                                           <span className="mt-1 block text-xs text-zinc-600">
-                                            {blockedByCombo ? "Já incluído no combo selecionado" : "Outra opção desta categoria já foi escolhida"}
+                                            {blockedByCombo
+                                              ? "Já incluído no combo selecionado"
+                                              : "Outra opção desta categoria já foi escolhida"}
                                           </span>
                                         )}
                                       </div>
                                       <div className="flex shrink-0 items-center gap-3">
                                         <span className="text-sm font-bold text-amber-500">
-                                          R$ {service.price.toFixed(2).replace(".", ",")}
+                                          R${" "}
+                                          {service.price
+                                            .toFixed(2)
+                                            .replace(".", ",")}
                                         </span>
-                                        <span className={`grid h-6 w-6 place-items-center rounded-full border text-xs ${selected ? "border-amber-500 bg-amber-500 text-zinc-950" : "border-zinc-700 text-transparent"}`}>
+                                        <span
+                                          className={`grid h-6 w-6 place-items-center rounded-full border text-xs ${selected ? "border-amber-500 bg-amber-500 text-zinc-950" : "border-zinc-700 text-transparent"}`}
+                                        >
                                           ✓
                                         </span>
                                       </div>
@@ -404,45 +455,61 @@ export function Booking() {
                     </section>
                   ))}
 
-                  {services.filter((service) => service.category === "COMBO").length > 0 && (
+                  {services.filter((service) => service.category === "COMBO")
+                    .length > 0 && (
                     <section>
                       <h3 className="text-lg font-black text-white">Combos</h3>
                       <p className="mt-1 text-sm leading-6 text-zinc-500">
-                        Um combo substitui os serviços que fazem parte dele. Você ainda pode adicionar outras categorias que não estejam incluídas.
+                        Um combo substitui os serviços que fazem parte dele.
+                        Você ainda pode adicionar outras categorias que não
+                        estejam incluídas.
                       </p>
                       <div className="mt-5 grid gap-3">
-                        {services.filter((service) => service.category === "COMBO").map((service) => {
-                          const selected = serviceIds.includes(service.id);
-                          const anotherComboSelected = Boolean(selectedCombo && !selected);
-                          return (
-                            <button
-                              key={service.id}
-                              type="button"
-                              disabled={anotherComboSelected}
-                              onClick={() => toggleService(service)}
-                              className={`flex items-start justify-between gap-4 rounded-2xl border p-4 text-left transition ${
-                                selected
-                                  ? "border-amber-500 bg-amber-500/10"
-                                  : anotherComboSelected
-                                    ? "cursor-not-allowed border-white/5 bg-zinc-950/50 opacity-45"
-                                    : "border-white/10 bg-zinc-950 hover:border-amber-500/50"
-                              }`}
-                            >
-                              <div>
-                                <span className="block font-bold text-white">{service.name}</span>
-                                <span className="mt-1 block text-xs leading-5 text-zinc-500">
-                                  {service.comboItems?.map((item) => item.service.name).join(" + ") || "Combo sem itens"}
-                                </span>
-                              </div>
-                              <div className="flex shrink-0 items-center gap-3">
-                                <span className="text-sm font-bold text-amber-500">
-                                  R$ {service.price.toFixed(2).replace(".", ",")}
-                                </span>
-                                <span className={`grid h-6 w-6 place-items-center rounded-full border text-xs ${selected ? "border-amber-500 bg-amber-500 text-zinc-950" : "border-zinc-700 text-transparent"}`}>✓</span>
-                              </div>
-                            </button>
-                          );
-                        })}
+                        {services
+                          .filter((service) => service.category === "COMBO")
+                          .map((service) => {
+                            const selected = serviceIds.includes(service.id);
+                            const anotherComboSelected = Boolean(
+                              selectedCombo && !selected,
+                            );
+                            return (
+                              <button
+                                key={service.id}
+                                type="button"
+                                disabled={anotherComboSelected}
+                                onClick={() => toggleService(service)}
+                                className={`flex items-start justify-between gap-4 rounded-2xl border p-4 text-left transition ${
+                                  selected
+                                    ? "border-amber-500 bg-amber-500/10"
+                                    : anotherComboSelected
+                                      ? "cursor-not-allowed border-white/5 bg-zinc-950/50 opacity-45"
+                                      : "border-white/10 bg-zinc-950 hover:border-amber-500/50"
+                                }`}
+                              >
+                                <div>
+                                  <span className="block font-bold text-white">
+                                    {service.name}
+                                  </span>
+                                  <span className="mt-1 block text-xs leading-5 text-zinc-500">
+                                    {service.comboItems
+                                      ?.map((item) => item.service.name)
+                                      .join(" + ") || "Combo sem itens"}
+                                  </span>
+                                </div>
+                                <div className="flex shrink-0 items-center gap-3">
+                                  <span className="text-sm font-bold text-amber-500">
+                                    R${" "}
+                                    {service.price.toFixed(2).replace(".", ",")}
+                                  </span>
+                                  <span
+                                    className={`grid h-6 w-6 place-items-center rounded-full border text-xs ${selected ? "border-amber-500 bg-amber-500 text-zinc-950" : "border-zinc-700 text-transparent"}`}
+                                  >
+                                    ✓
+                                  </span>
+                                </div>
+                              </button>
+                            );
+                          })}
                       </div>
                     </section>
                   )}
@@ -497,7 +564,8 @@ export function Booking() {
                       const unavailable = s.available === false;
                       const selected =
                         !unavailable &&
-                        ((s.templateId && scheduleTemplateId === s.templateId) ||
+                        ((s.templateId &&
+                          scheduleTemplateId === s.templateId) ||
                           (!s.templateId && scheduleId === s.id));
                       return (
                         <button
@@ -662,12 +730,17 @@ export function Booking() {
       </main>
 
       {barberToConfirm && (
-        <Modal title="É este o barbeiro?" onClose={() => setBarberToConfirm(null)}>
+        <Modal
+          title="É este o barbeiro?"
+          onClose={() => setBarberToConfirm(null)}
+        >
           <div className="text-center">
             <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-amber-500/10 text-4xl">
               💈
             </div>
-            <h2 className="mt-5 text-2xl font-black text-white">{barberToConfirm.name}</h2>
+            <h2 className="mt-5 text-2xl font-black text-white">
+              {barberToConfirm.name}
+            </h2>
             <p className="mt-2 text-sm leading-6 text-zinc-400">
               Você quer continuar o agendamento com este barbeiro?
             </p>

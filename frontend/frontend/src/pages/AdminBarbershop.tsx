@@ -37,7 +37,9 @@ export function AdminBarbershop() {
           tiktok: data.tiktok || "",
         });
       })
-      .catch((e) => setError(e instanceof Error ? e.message : "Erro ao carregar."))
+      .catch((e) =>
+        setError(e instanceof Error ? e.message : "Erro ao carregar."),
+      )
       .finally(() => setLoading(false));
   }, []);
 
@@ -83,7 +85,9 @@ export function AdminBarbershop() {
               Nome
               <input
                 value={form.name}
-                onChange={(e) => setForm((current) => ({ ...current, name: e.target.value }))}
+                onChange={(e) =>
+                  setForm((current) => ({ ...current, name: e.target.value }))
+                }
                 className="mt-2 w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 font-normal outline-none focus:border-amber-500"
               />
             </label>
@@ -92,7 +96,12 @@ export function AdminBarbershop() {
               Descrição
               <textarea
                 value={form.description}
-                onChange={(e) => setForm((current) => ({ ...current, description: e.target.value }))}
+                onChange={(e) =>
+                  setForm((current) => ({
+                    ...current,
+                    description: e.target.value,
+                  }))
+                }
                 rows={3}
                 className="mt-2 w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 font-normal outline-none focus:border-amber-500"
               />
@@ -102,7 +111,12 @@ export function AdminBarbershop() {
               WhatsApp
               <input
                 value={form.whatsapp}
-                onChange={(e) => setForm((current) => ({ ...current, whatsapp: formatPhone(e.target.value) }))}
+                onChange={(e) =>
+                  setForm((current) => ({
+                    ...current,
+                    whatsapp: formatPhone(e.target.value),
+                  }))
+                }
                 placeholder="(12) 99999-9999"
                 inputMode="tel"
                 maxLength={15}
@@ -111,15 +125,51 @@ export function AdminBarbershop() {
             </label>
 
             <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[.02] p-4">
-              <p className="text-sm font-bold">Redes sociais <span className="font-normal text-zinc-500">(opcional)</span></p>
-              <label className="block text-xs font-bold text-zinc-400">Instagram
-                <input value={form.instagram} onChange={(e) => setForm((current) => ({ ...current, instagram: e.target.value }))} placeholder="https://instagram.com/suabarbearia" className="mt-1.5 w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-sm font-normal outline-none focus:border-amber-500" />
+              <p className="text-sm font-bold">
+                Redes sociais{" "}
+                <span className="font-normal text-zinc-500">(opcional)</span>
+              </p>
+              <label className="block text-xs font-bold text-zinc-400">
+                Instagram
+                <input
+                  value={form.instagram}
+                  onChange={(e) =>
+                    setForm((current) => ({
+                      ...current,
+                      instagram: e.target.value,
+                    }))
+                  }
+                  placeholder="https://instagram.com/suabarbearia"
+                  className="mt-1.5 w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-sm font-normal outline-none focus:border-amber-500"
+                />
               </label>
-              <label className="block text-xs font-bold text-zinc-400">Facebook
-                <input value={form.facebook} onChange={(e) => setForm((current) => ({ ...current, facebook: e.target.value }))} placeholder="https://facebook.com/suabarbearia" className="mt-1.5 w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-sm font-normal outline-none focus:border-amber-500" />
+              <label className="block text-xs font-bold text-zinc-400">
+                Facebook
+                <input
+                  value={form.facebook}
+                  onChange={(e) =>
+                    setForm((current) => ({
+                      ...current,
+                      facebook: e.target.value,
+                    }))
+                  }
+                  placeholder="https://facebook.com/suabarbearia"
+                  className="mt-1.5 w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-sm font-normal outline-none focus:border-amber-500"
+                />
               </label>
-              <label className="block text-xs font-bold text-zinc-400">TikTok
-                <input value={form.tiktok} onChange={(e) => setForm((current) => ({ ...current, tiktok: e.target.value }))} placeholder="https://tiktok.com/@suabarbearia" className="mt-1.5 w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-sm font-normal outline-none focus:border-amber-500" />
+              <label className="block text-xs font-bold text-zinc-400">
+                TikTok
+                <input
+                  value={form.tiktok}
+                  onChange={(e) =>
+                    setForm((current) => ({
+                      ...current,
+                      tiktok: e.target.value,
+                    }))
+                  }
+                  placeholder="https://tiktok.com/@suabarbearia"
+                  className="mt-1.5 w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-sm font-normal outline-none focus:border-amber-500"
+                />
               </label>
             </div>
 
@@ -127,7 +177,9 @@ export function AdminBarbershop() {
               <p className="mb-2 text-sm font-bold">Imagem da barbearia</p>
               <ImageUploadButton
                 value={form.imageUrl}
-                onChange={(value) => setForm((current) => ({ ...current, imageUrl: value }))}
+                onChange={(value) =>
+                  setForm((current) => ({ ...current, imageUrl: value }))
+                }
                 label="Adicionar imagem da barbearia"
                 errorMessage={setError}
               />

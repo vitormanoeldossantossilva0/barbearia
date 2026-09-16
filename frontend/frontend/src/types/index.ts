@@ -1,5 +1,10 @@
 export type AppointmentStatus = "CONFIRMADO" | "CANCELADO";
-export type ServiceCategory = "CORTE" | "BARBA" | "SOBRANCELHA" | "PINTURA" | "COMBO";
+export type ServiceCategory =
+  | "CORTE"
+  | "BARBA"
+  | "SOBRANCELHA"
+  | "PINTURA"
+  | "COMBO";
 
 export interface Barbershop {
   id: number;
@@ -33,7 +38,12 @@ export interface BarberAccount extends Barber {
   user?: { email: string; role?: "MASTER" | "ADMIN" | "BARBER" };
 }
 
-export interface AuthUser { id: number; email: string; role: "MASTER" | "ADMIN" | "BARBER"; barbershopId?: number | null; }
+export interface AuthUser {
+  id: number;
+  email: string;
+  role: "MASTER" | "ADMIN" | "BARBER";
+  barbershopId?: number | null;
+}
 
 export interface AuthResponse {
   token: string;
@@ -45,7 +55,6 @@ export interface AuthResponse {
 export interface MasterBarbershop extends Barbershop {
   _count?: { barbers: number };
 }
-
 
 export interface ServiceComboItem {
   comboId: number;

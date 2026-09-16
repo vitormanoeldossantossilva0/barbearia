@@ -33,7 +33,9 @@ export function MasterBarbershops() {
     barbershopService
       .masterList()
       .then(setItems)
-      .catch((e) => setError(e instanceof Error ? e.message : "Erro ao carregar."))
+      .catch((e) =>
+        setError(e instanceof Error ? e.message : "Erro ao carregar."),
+      )
       .finally(() => setLoading(false));
   };
 
@@ -71,7 +73,9 @@ export function MasterBarbershops() {
       !form.email.trim() ||
       form.password.length < 8
     ) {
-      setError("Preencha barbearia, responsável, e-mail e senha de pelo menos 8 caracteres.");
+      setError(
+        "Preencha barbearia, responsável, e-mail e senha de pelo menos 8 caracteres.",
+      );
       return;
     }
 
@@ -86,7 +90,9 @@ export function MasterBarbershops() {
         slug: form.slug.trim(),
       });
       setCreating(false);
-      setMessage("Barbearia criada. O responsável já pode entrar pelo /slug/admin.");
+      setMessage(
+        "Barbearia criada. O responsável já pode entrar pelo /slug/admin.",
+      );
       setForm(empty);
       load();
     } catch (e) {
@@ -98,7 +104,7 @@ export function MasterBarbershops() {
 
   const remove = async (shop: MasterBarbershop) => {
     const confirmed = window.confirm(
-      `Excluir a barbearia "${shop.name}"? Esta ação excluirá também os barbeiros, serviços, horários e agendamentos vinculados a ela e não poderá ser desfeita.`
+      `Excluir a barbearia "${shop.name}"? Esta ação excluirá também os barbeiros, serviços, horários e agendamentos vinculados a ela e não poderá ser desfeita.`,
     );
     if (!confirmed) return;
 
@@ -143,7 +149,9 @@ export function MasterBarbershops() {
   const modal = (
     <Modal
       title={editing ? `Editar ${editing.name}` : "Nova barbearia"}
-      onClose={() => !saving && (editing ? setEditing(null) : setCreating(false))}
+      onClose={() =>
+        !saving && (editing ? setEditing(null) : setCreating(false))
+      }
     >
       <div className="space-y-4">
         {!editing && (
@@ -237,7 +245,11 @@ export function MasterBarbershops() {
           onClick={editing ? update : create}
           className="w-full rounded-xl bg-amber-500 py-3 font-black text-zinc-950 transition hover:bg-amber-400 disabled:opacity-50"
         >
-          {saving ? "Salvando..." : editing ? "Salvar alterações" : "Criar barbearia"}
+          {saving
+            ? "Salvando..."
+            : editing
+              ? "Salvar alterações"
+              : "Criar barbearia"}
         </button>
       </div>
     </Modal>
@@ -248,7 +260,9 @@ export function MasterBarbershops() {
       <div className="mb-6 flex items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-black">Barbearias</h2>
-          <p className="mt-1 text-sm text-zinc-500">Crie clientes novos sem duplicar o projeto.</p>
+          <p className="mt-1 text-sm text-zinc-500">
+            Crie clientes novos sem duplicar o projeto.
+          </p>
         </div>
         <button
           onClick={openCreate}
@@ -279,7 +293,11 @@ export function MasterBarbershops() {
               className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-900"
             >
               {shop.imageUrl ? (
-                <img src={shop.imageUrl} alt={shop.name} className="h-40 w-full object-cover" />
+                <img
+                  src={shop.imageUrl}
+                  alt={shop.name}
+                  className="h-40 w-full object-cover"
+                />
               ) : (
                 <div className="grid h-40 place-items-center bg-gradient-to-br from-zinc-800 to-zinc-950 text-7xl">
                   💈
@@ -306,8 +324,12 @@ export function MasterBarbershops() {
                     </button>
                   </div>
                 </div>
-                <p className="mt-4 text-sm text-zinc-400">{shop._count?.barbers ?? 0} barbeiro(s)</p>
-                <p className="mt-1 text-xs text-zinc-600">Link público: /{shop.slug}</p>
+                <p className="mt-4 text-sm text-zinc-400">
+                  {shop._count?.barbers ?? 0} barbeiro(s)
+                </p>
+                <p className="mt-1 text-xs text-zinc-600">
+                  Link público: /{shop.slug}
+                </p>
               </div>
             </article>
           ))}

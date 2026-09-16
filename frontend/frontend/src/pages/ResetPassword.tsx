@@ -26,9 +26,17 @@ export function ResetPassword() {
     try {
       const result = await authService.resetPassword(code.trim(), password);
       setSuccess(result.mensagem);
-      setTimeout(() => navigate(`/${encodeURIComponent(slug)}/admin/login`, { replace: true }), 900);
+      setTimeout(
+        () =>
+          navigate(`/${encodeURIComponent(slug)}/admin/login`, {
+            replace: true,
+          }),
+        900,
+      );
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Não foi possível redefinir a senha.");
+      setError(
+        e instanceof Error ? e.message : "Não foi possível redefinir a senha.",
+      );
     } finally {
       setSending(false);
     }
@@ -45,7 +53,8 @@ export function ResetPassword() {
         </p>
         <h1 className="mt-2 text-3xl font-black">Redefinir senha</h1>
         <p className="mt-2 text-sm text-zinc-500">
-          Use o código mestre definido no ambiente do sistema para criar uma nova senha.
+          Use o código mestre definido no ambiente do sistema para criar uma
+          nova senha.
         </p>
 
         {error && (

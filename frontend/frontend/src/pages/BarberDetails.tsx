@@ -76,7 +76,9 @@ export function BarberDetails() {
       <PublicHeader shopSlug={shopSlug || undefined} />
       <main className="mx-auto max-w-5xl px-4 py-14 sm:px-6">
         <button
-          onClick={() => navigate(shopSlug ? `/${encodeURIComponent(shopSlug)}` : "/")}
+          onClick={() =>
+            navigate(shopSlug ? `/${encodeURIComponent(shopSlug)}` : "/")
+          }
           className="text-sm text-zinc-500 hover:text-black cursor-pointer"
         >
           ← Voltar
@@ -90,14 +92,30 @@ export function BarberDetails() {
             <div className="mt-8 grid gap-8 md:grid-cols-[.8fr_1.2fr]">
               <section className="rounded-3xl border border-white/10 bg-zinc-900 p-7">
                 <div className="h-44 overflow-hidden rounded-2xl bg-zinc-950">
-                  {barber.imageUrl ? <img src={barber.imageUrl} alt={`Foto de ${barber.name}`} className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-7xl">💈</div>}
+                  {barber.imageUrl ? (
+                    <img
+                      src={barber.imageUrl}
+                      alt={`Foto de ${barber.name}`}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="grid h-full place-items-center text-7xl">
+                      💈
+                    </div>
+                  )}
                 </div>
-                <h1 className="mt-7 text-3xl font-black text-white">{barber.name}</h1>
+                <h1 className="mt-7 text-3xl font-black text-white">
+                  {barber.name}
+                </h1>
                 <p className="mt-3 leading-7 text-zinc-400">
                   {barber.description}
                 </p>
                 <button
-                  onClick={() => navigate(`/${encodeURIComponent(shopSlug)}/booking?barber=${barber.id}`)}
+                  onClick={() =>
+                    navigate(
+                      `/${encodeURIComponent(shopSlug)}/booking?barber=${barber.id}`,
+                    )
+                  }
                   className="mt-7 block w-full rounded-xl bg-amber-500 px-5 py-3 text-center font-black text-zinc-950 hover:cursor-pointer"
                 >
                   Agendar com {barber.name.split(" ")[0]}
@@ -153,7 +171,10 @@ export function BarberDetails() {
                               : "border-white/10 bg-zinc-950 text-zinc-300 hover:border-amber-500 hover:text-amber-500"
                           }`}
                         >
-                          {s.time} {s.available === false ? "· Indisponível" : "· Agendar"}
+                          {s.time}{" "}
+                          {s.available === false
+                            ? "· Indisponível"
+                            : "· Agendar"}
                         </button>
                       ))}
                     </div>

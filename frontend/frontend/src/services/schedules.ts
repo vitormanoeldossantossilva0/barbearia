@@ -10,7 +10,6 @@ export const scheduleService = {
     return api.get<Schedule[]>(query ? `/schedules?${query}` : "/schedules");
   },
   mine: () => api.get<ScheduleTemplate[]>("/schedules/mine"),
-  create: (time: string) =>
-    api.post<ScheduleTemplate>("/schedules", { time }),
+  create: (time: string) => api.post<ScheduleTemplate>("/schedules", { time }),
   remove: (id: number) => api.delete(`/schedules/${id}`),
 };

@@ -23,28 +23,42 @@ export function AdminLayout({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!authService.isAuthenticated(shopSlug)) {
-      navigate(`/${encodeURIComponent(shopSlug)}/admin/login`, { replace: true });
+      navigate(`/${encodeURIComponent(shopSlug)}/admin/login`, {
+        replace: true,
+      });
       return;
     }
-    authService.me().then((data) => {
-      if (data.user.role === "MASTER") { navigate("/master", { replace: true }); return; }
-      const currentShop = data.barbershop?.slug || "";
-      if (shopSlug && currentShop !== shopSlug) {
-        navigate(`/${encodeURIComponent(shopSlug)}/admin/login`, { replace: true });
-        return;
-      }
-      if (data.barber) setBarber(data.barber); else throw new Error();
-    }).catch(() => {
-      authService.logout(shopSlug);
-      navigate(`/${encodeURIComponent(shopSlug)}/admin/login`, { replace: true });
-    });
+    authService
+      .me()
+      .then((data) => {
+        if (data.user.role === "MASTER") {
+          navigate("/master", { replace: true });
+          return;
+        }
+        const currentShop = data.barbershop?.slug || "";
+        if (shopSlug && currentShop !== shopSlug) {
+          navigate(`/${encodeURIComponent(shopSlug)}/admin/login`, {
+            replace: true,
+          });
+          return;
+        }
+        if (data.barber) setBarber(data.barber);
+        else throw new Error();
+      })
+      .catch(() => {
+        authService.logout(shopSlug);
+        navigate(`/${encodeURIComponent(shopSlug)}/admin/login`, {
+          replace: true,
+        });
+      });
   }, [navigate, shopSlug]);
 
-  const activeLabel = links.find(([to]) =>
-    to === "/admin"
-      ? /\/admin$/.test(location.pathname)
-      : location.pathname.endsWith(to),
-  )?.[1] ?? "Detalhes";
+  const activeLabel =
+    links.find(([to]) =>
+      to === "/admin"
+        ? /\/admin$/.test(location.pathname)
+        : location.pathname.endsWith(to),
+    )?.[1] ?? "Detalhes";
 
   const logout = () => {
     authService.logout(shopSlug);
@@ -59,7 +73,9 @@ export function AdminLayout({ children }: { children: ReactNode }) {
           <div className="mt-7 rounded-xl border border-white/10 bg-white/5 p-3">
             <p className="text-xs text-zinc-500">Logado como</p>
             <p className="mt-1 font-bold">{barber.name}</p>
-            <p className="mt-1 truncate text-xs text-zinc-600">{barber.user?.email}</p>
+            <p className="mt-1 truncate text-xs text-zinc-600">
+              {barber.user?.email}
+            </p>
           </div>
         )}
         <p className="mt-7 px-3 text-xs font-bold uppercase tracking-widest text-zinc-600">
@@ -96,15 +112,19 @@ export function AdminLayout({ children }: { children: ReactNode }) {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-zinc-500">Painel administrativo</p>
-              <h1 className="font-bold">
-                {activeLabel}
-              </h1>
+              <h1 className="font-bold">{activeLabel}</h1>
             </div>
             <div className="flex items-center gap-4">
-              <button onClick={logout} className="text-sm font-medium text-zinc-400 hover:text-white">
+              <button
+                onClick={logout}
+                className="text-sm font-medium text-zinc-400 hover:text-white"
+              >
                 Sair
               </button>
-              <NavLink to={`/${encodeURIComponent(shopSlug)}`} className="text-sm font-medium text-zinc-400 hover:text-white">
+              <NavLink
+                to={`/${encodeURIComponent(shopSlug)}`}
+                className="text-sm font-medium text-zinc-400 hover:text-white"
+              >
                 ← Site público
               </NavLink>
             </div>
@@ -117,7 +137,9 @@ export function AdminLayout({ children }: { children: ReactNode }) {
                 end={to === "/admin"}
                 className={({ isActive }) =>
                   `whitespace-nowrap rounded-full px-3 py-1.5 text-xs ${
-                    isActive ? "bg-amber-500 font-bold text-zinc-950" : "bg-white/5 text-zinc-400"
+                    isActive
+                      ? "bg-amber-500 font-bold text-zinc-950"
+                      : "bg-white/5 text-zinc-400"
                   }`
                 }
               >

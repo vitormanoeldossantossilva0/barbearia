@@ -11,7 +11,8 @@ export function Logo({ homeHref = "/", name = "BARBEARIA" }: LogoProps) {
         ✂
       </span>
       <span className="max-w-[10rem] break-words text-sm font-black leading-tight tracking-tight text-white sm:max-w-[18rem] sm:text-lg">
-        {name}<span className="text-amber-500">.</span>
+        {name}
+        <span className="text-amber-500">.</span>
       </span>
     </a>
   );

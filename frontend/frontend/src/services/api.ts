@@ -1,6 +1,7 @@
 const API_URL = (
   import.meta.env.VITE_API_URL ||
-  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+  (window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1"
     ? "http://localhost:3333"
     : "https://barbearia-k02x.onrender.com")
 ).replace(/\/$/, "");
@@ -15,8 +16,12 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const adminMatch = window.location.pathname.match(/^\/([^/]+)\/admin(?:\/|$)/);
-  const slug = adminMatch?.[1] ? decodeURIComponent(adminMatch[1]).trim().toLowerCase() : "";
+  const adminMatch = window.location.pathname.match(
+    /^\/([^/]+)\/admin(?:\/|$)/,
+  );
+  const slug = adminMatch?.[1]
+    ? decodeURIComponent(adminMatch[1]).trim().toLowerCase()
+    : "";
   const tokenKey = slug ? `barbearia_token_${slug}` : "barbearia_token_master";
   const token = localStorage.getItem(tokenKey);
   const headers: HeadersInit = {
