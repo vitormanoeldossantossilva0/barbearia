@@ -19,9 +19,7 @@ const socialUrl = (value: unknown) => {
   if (!url) return null;
   try {
     const parsed = new URL(url);
-    return parsed.protocol === "http:" || parsed.protocol === "https:"
-      ? parsed.toString()
-      : null;
+    return parsed.protocol === "http:" || parsed.protocol === "https:" ? parsed.toString() : null;
   } catch {
     return null;
   }
@@ -30,25 +28,11 @@ const socialUrl = (value: unknown) => {
 router.get("/", async (req, res) => {
   try {
     const shopSlug = String(req.query.barbershopSlug ?? "").trim();
-    const shop = shopSlug
-      ? await prisma.barbershop.findUnique({ where: { slug: shopSlug } })
-      : null;
-    if (shopSlug && !shop)
-      return res.status(404).json({ mensagem: "Barbearia não encontrada." });
+    const shop = shopSlug ? await prisma.barbershop.findUnique({ where: { slug: shopSlug } }) : null;
+    if (shopSlug && !shop) return res.status(404).json({ mensagem: "Barbearia não encontrada." });
     const barbers = await prisma.barber.findMany({
       where: shop ? { barbershopId: shop.id } : undefined,
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        slug: true,
-        whatsapp: true,
-        imageUrl: true,
-        instagram: true,
-        facebook: true,
-        tiktok: true,
-        barbershopId: true,
-      },
+      select: { id: true, name: true, description: true, slug: true, whatsapp: true, imageUrl: true, instagram: true, facebook: true, tiktok: true, barbershopId: true },
       orderBy: { name: "asc" },
     });
     return res.json(barbers);
@@ -61,28 +45,13 @@ router.get("/", async (req, res) => {
 router.get("/me", authMiddleware, async (req, res) => {
   try {
     if (!req.auth!.barberId || !req.auth!.barbershopId) {
-      return res
-        .status(403)
-        .json({ mensagem: "Conta sem barbeiro ou barbearia vinculada." });
+      return res.status(403).json({ mensagem: "Conta sem barbeiro ou barbearia vinculada." });
     }
     const barber = await prisma.barber.findFirst({
       where: { id: req.auth!.barberId, barbershopId: req.auth!.barbershopId },
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        slug: true,
-        whatsapp: true,
-        imageUrl: true,
-        instagram: true,
-        facebook: true,
-        tiktok: true,
-        barbershopId: true,
-        user: { select: { email: true, role: true } },
-      },
+      select: { id: true, name: true, description: true, slug: true, whatsapp: true, imageUrl: true, instagram: true, facebook: true, tiktok: true, barbershopId: true, user: { select: { email: true, role: true } } },
     });
-    if (!barber)
-      return res.status(404).json({ mensagem: "Barbeiro não encontrado." });
+    if (!barber) return res.status(404).json({ mensagem: "Barbeiro não encontrado." });
     return res.json(barber);
   } catch (error) {
     console.error(error);
@@ -119,31 +88,10 @@ router.get("/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
     const barber = await prisma.barber.findFirst({
-      where: {
-        id,
-        ...(req.query.barbershopSlug
-          ? {
-              barbershop: {
-                slug: String(req.query.barbershopSlug).trim().toLowerCase(),
-              },
-            }
-          : {}),
-      },
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        slug: true,
-        whatsapp: true,
-        imageUrl: true,
-        instagram: true,
-        facebook: true,
-        tiktok: true,
-        barbershopId: true,
-      },
+      where: { id, ...(req.query.barbershopSlug ? { barbershop: { slug: String(req.query.barbershopSlug).trim().toLowerCase() } } : {}) },
+      select: { id: true, name: true, description: true, slug: true, whatsapp: true, imageUrl: true, instagram: true, facebook: true, tiktok: true, barbershopId: true },
     });
-    if (!barber)
-      return res.status(404).json({ mensagem: "Barbeiro não encontrado." });
+    if (!barber) return res.status(404).json({ mensagem: "Barbeiro não encontrado." });
     return res.json(barber);
   } catch (error) {
     console.error(error);
@@ -155,56 +103,29 @@ router.post("/", authMiddleware, adminOnly, async (req, res) => {
   try {
     const name = String(req.body.name ?? "").trim();
     const description = String(req.body.description ?? "").trim();
-    const email = String(req.body.email ?? "")
-      .trim()
-      .toLowerCase();
+    const email = String(req.body.email ?? "").trim().toLowerCase();
     const password = String(req.body.password ?? "");
     const instagram = socialUrl(req.body.instagram);
     const facebook = socialUrl(req.body.facebook);
     const tiktok = socialUrl(req.body.tiktok);
-    if (
-      [req.body.instagram, req.body.facebook, req.body.tiktok].some(
-        (value) => String(value ?? "").trim() && !socialUrl(value),
-      )
-    ) {
-      return res.status(400).json({
-        mensagem:
-          "Os links das redes sociais devem começar com http:// ou https://.",
-      });
+    if ([req.body.instagram, req.body.facebook, req.body.tiktok].some((value) => String(value ?? "").trim() && !socialUrl(value))) {
+      return res.status(400).json({ mensagem: "Os links das redes sociais devem começar com http:// ou https://." });
     }
 
-    const barbershopId = req.auth!.barbershopId;
-
-    if (!barbershopId) {
-      return res.status(400).json({
-        mensagem: "Barbearia da conta não encontrada.",
-      });
-    }
+    if (!req.auth!.barbershopId) return res.status(400).json({ mensagem: "Barbearia da conta não encontrada." });
 
     if (name.length < 2 || !email || password.length < 8) {
       return res.status(400).json({
-        mensagem:
-          "Informe nome, e-mail e uma senha de pelo menos 8 caracteres.",
+        mensagem: "Informe nome, e-mail e uma senha de pelo menos 8 caracteres.",
       });
     }
 
     const exists = await prisma.user.findUnique({ where: { email } });
-
-    if (exists) {
-      return res.status(409).json({
-        mensagem: "Este e-mail já está em uso.",
-      });
-    }
+    if (exists) return res.status(409).json({ mensagem: "Este e-mail já está em uso." });
 
     let slug = makeSlug(name);
-
-    const slugExists = await prisma.barber.findUnique({
-      where: { slug },
-    });
-
-    if (slugExists) {
-      slug = `${slug}-${Date.now()}`;
-    }
+    const slugExists = await prisma.barber.findUnique({ where: { slug } });
+    if (slugExists) slug = `${slug}-${Date.now()}`;
 
     const hash = await bcrypt.hash(password, 12);
 
@@ -219,19 +140,12 @@ router.post("/", authMiddleware, adminOnly, async (req, res) => {
           instagram,
           facebook,
           tiktok,
-          barbershopId,
+          barbershopId: req.auth!.barbershopId,
         },
       });
-
       const user = await tx.user.create({
-        data: {
-          email,
-          password: hash,
-          barberId: barber.id,
-          role: "BARBER",
-        },
+        data: { email, password: hash, barberId: barber.id, role: "BARBER" },
       });
-
       return { barber, user };
     });
 
@@ -248,37 +162,22 @@ router.post("/", authMiddleware, adminOnly, async (req, res) => {
 router.put("/:id", authMiddleware, async (req, res) => {
   try {
     const id = Number(req.params.id);
-    if (!Number.isInteger(id) || id <= 0)
-      return res.status(400).json({ mensagem: "Barbeiro inválido." });
-    if (!req.auth!.barbershopId || !req.auth!.barberId)
-      return res
-        .status(403)
-        .json({ mensagem: "Conta sem barbearia vinculada." });
+    if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ mensagem: "Barbeiro inválido." });
+    if (!req.auth!.barbershopId || !req.auth!.barberId) return res.status(403).json({ mensagem: "Conta sem barbearia vinculada." });
     if (req.auth!.role !== "ADMIN" && id !== req.auth!.barberId) {
-      return res
-        .status(403)
-        .json({ mensagem: "Você só pode editar sua própria conta." });
+      return res.status(403).json({ mensagem: "Você só pode editar sua própria conta." });
     }
 
     const name = String(req.body.name ?? "").trim();
     const description = String(req.body.description ?? "").trim();
     const whatsapp = String(req.body.whatsapp ?? "").trim() || null;
-    const email = String(req.body.email ?? "")
-      .trim()
-      .toLowerCase();
+    const email = String(req.body.email ?? "").trim().toLowerCase();
     const password = String(req.body.password ?? "");
     const instagram = socialUrl(req.body.instagram);
     const facebook = socialUrl(req.body.facebook);
     const tiktok = socialUrl(req.body.tiktok);
-    if (
-      [req.body.instagram, req.body.facebook, req.body.tiktok].some(
-        (value) => String(value ?? "").trim() && !socialUrl(value),
-      )
-    ) {
-      return res.status(400).json({
-        mensagem:
-          "Os links das redes sociais devem começar com http:// ou https://.",
-      });
+    if ([req.body.instagram, req.body.facebook, req.body.tiktok].some((value) => String(value ?? "").trim() && !socialUrl(value))) {
+      return res.status(400).json({ mensagem: "Os links das redes sociais devem começar com http:// ou https://." });
     }
 
     if (name.length < 2) {
@@ -288,25 +187,16 @@ router.put("/:id", authMiddleware, async (req, res) => {
       return res.status(400).json({ mensagem: "Informe um e-mail válido." });
     }
     if (password && password.length < 8) {
-      return res
-        .status(400)
-        .json({ mensagem: "A nova senha deve ter pelo menos 8 caracteres." });
+      return res.status(400).json({ mensagem: "A nova senha deve ter pelo menos 8 caracteres." });
     }
 
     const current = await prisma.barber.findUnique({
       where: { id },
       include: { user: true },
     });
-    if (!current)
-      return res.status(404).json({ mensagem: "Barbeiro não encontrado." });
-    if (current.barbershopId !== req.auth!.barbershopId)
-      return res
-        .status(403)
-        .json({ mensagem: "Você não pode acessar esse barbeiro." });
-    if (!current.user)
-      return res
-        .status(404)
-        .json({ mensagem: "Conta de acesso do barbeiro não encontrada." });
+    if (!current) return res.status(404).json({ mensagem: "Barbeiro não encontrado." });
+    if (current.barbershopId !== req.auth!.barbershopId) return res.status(403).json({ mensagem: "Você não pode acessar esse barbeiro." });
+    if (!current.user) return res.status(404).json({ mensagem: "Conta de acesso do barbeiro não encontrada." });
 
     const emailOwner = await prisma.user.findUnique({ where: { email } });
     if (emailOwner && emailOwner.id !== current.user.id) {
@@ -355,35 +245,20 @@ router.put("/:id", authMiddleware, async (req, res) => {
 router.delete("/:id", authMiddleware, async (req, res) => {
   try {
     const id = Number(req.params.id);
-    if (
-      !Number.isInteger(id) ||
-      id <= 0 ||
-      !req.auth!.barbershopId ||
-      !req.auth!.barberId
-    ) {
-      return res
-        .status(403)
-        .json({ mensagem: "Conta sem barbearia vinculada." });
+    if (!Number.isInteger(id) || id <= 0 || !req.auth!.barbershopId || !req.auth!.barberId) {
+      return res.status(403).json({ mensagem: "Conta sem barbearia vinculada." });
     }
     if (id !== req.auth!.barberId && req.auth!.role !== "ADMIN") {
-      return res
-        .status(403)
-        .json({ mensagem: "Você só pode excluir sua própria conta." });
+      return res.status(403).json({ mensagem: "Você só pode excluir sua própria conta." });
     }
     if (id === req.auth!.barberId) {
-      return res.status(400).json({
-        mensagem:
-          "A conta administrativa principal não pode ser excluída por aqui.",
-      });
+      return res.status(400).json({ mensagem: "A conta administrativa principal não pode ser excluída por aqui." });
     }
 
     await prisma.$transaction(async (tx) => {
       const target = await tx.barber.findUnique({
         where: { id },
-        select: {
-          barbershopId: true,
-          user: { select: { id: true, role: true } },
-        },
+        select: { barbershopId: true, user: { select: { id: true, role: true } } },
       });
       if (!target) throw new Error("Barbeiro não encontrado.");
       if (target.barbershopId !== req.auth!.barbershopId) {
@@ -444,22 +319,9 @@ router.delete("/:id", authMiddleware, async (req, res) => {
     return res.status(204).send();
   } catch (error) {
     console.error(error);
-    if (
-      error instanceof Error &&
-      (error as Error & { status?: number }).status === 403
-    )
-      return res
-        .status(403)
-        .json({ mensagem: "Você não pode excluir esse barbeiro." });
-    if (
-      error instanceof Error &&
-      (error as Error & { status?: number }).status === 400 &&
-      error.message === "PROTECTED_ACCOUNT"
-    ) {
-      return res.status(400).json({
-        mensagem:
-          "A conta administrativa principal da barbearia não pode ser excluída por aqui.",
-      });
+    if (error instanceof Error && (error as Error & { status?: number }).status === 403) return res.status(403).json({ mensagem: "Você não pode excluir esse barbeiro." });
+    if (error instanceof Error && (error as Error & { status?: number }).status === 400 && error.message === "PROTECTED_ACCOUNT") {
+      return res.status(400).json({ mensagem: "A conta administrativa principal da barbearia não pode ser excluída por aqui." });
     }
     return res.status(500).json({ mensagem: "Erro ao excluir barbeiro." });
   }
