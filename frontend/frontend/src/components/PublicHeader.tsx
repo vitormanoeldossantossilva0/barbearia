@@ -1,11 +1,14 @@
+import type { MouseEvent } from "react";
 import { Logo } from "./Logo";
 
 export function PublicHeader({
   shopSlug,
   shopName,
+  isHome = false,
 }: {
   shopSlug?: string;
   shopName?: string;
+  isHome?: boolean;
 }) {
   const homeHref = shopSlug ? `/${encodeURIComponent(shopSlug)}` : "/";
   const anchor = (section: string) => `${homeHref}#${section}`;
@@ -13,8 +16,17 @@ export function PublicHeader({
     ? `/${encodeURIComponent(shopSlug)}/booking`
     : "/";
 
+  const handleMobileHomeClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (!isHome) return;
+    event.preventDefault();
+    document.getElementById("inicio")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
+
   return (
-    <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-5">
+    <header className={`${isHome ? "fixed" : "relative"} inset-x-0 top-0 z-50 px-3 pt-3 sm:px-5`}>
       <div className="mx-auto flex max-w-6xl items-center justify-between rounded-full border border-white/20 bg-black/20 px-4 py-2.5 shadow-2xl shadow-black/20 backdrop-blur-md sm:px-5">
         <Logo homeHref={homeHref} name={shopName || "BARBEARIA"} />
 
@@ -40,8 +52,15 @@ export function PublicHeader({
         </nav>
 
         <a
+          href={isHome ? "#inicio" : homeHref}
+          onClick={handleMobileHomeClick}
+          className="rounded-full bg-amber-500 px-4 py-2.5 text-xs font-black text-zinc-950 transition hover:bg-amber-400 sm:hidden"
+        >
+          Início
+        </a>
+        <a
           href={bookingHref}
-          className="rounded-full bg-amber-500 px-4 py-2.5 text-xs font-black text-zinc-950 transition hover:bg-amber-400 sm:px-5"
+          className="hidden rounded-full bg-amber-500 px-4 py-2.5 text-xs font-black text-zinc-950 transition hover:bg-amber-400 sm:inline-block"
         >
           Agendar horário
         </a>

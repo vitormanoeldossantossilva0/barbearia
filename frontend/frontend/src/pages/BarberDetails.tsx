@@ -72,14 +72,25 @@ export function BarberDetails() {
       </>
     );
   return (
-    <>
+    <div className="relative isolate min-h-screen overflow-hidden bg-zinc-950 text-white">
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <img
+          src="/images/barbershop-bg.jpg"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 h-full w-full scale-[1.08] object-cover object-center blur-[2px]"
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,.94)_0%,rgba(0,0,0,.72)_38%,rgba(0,0,0,.32)_72%,rgba(0,0,0,.12)_100%)]" />
+      </div>
+
       <PublicHeader shopSlug={shopSlug || undefined} />
-      <main className="mx-auto max-w-5xl px-4 py-14 sm:px-6">
+      <main className="relative isolate min-h-screen overflow-hidden px-4 py-14 sm:px-6">
+        <div className="mx-auto max-w-5xl">
         <button
           onClick={() =>
             navigate(shopSlug ? `/${encodeURIComponent(shopSlug)}` : "/")
           }
-          className="text-sm text-zinc-500 hover:text-black cursor-pointer"
+          className="text-sm font-bold text-white hover:text-amber-500 cursor-pointer"
         >
           ← Voltar
         </button>
@@ -90,8 +101,8 @@ export function BarberDetails() {
         ) : (
           barber && (
             <div className="mt-8 grid gap-8 md:grid-cols-[.8fr_1.2fr]">
-              <section className="rounded-3xl border border-white/10 bg-zinc-900 p-7">
-                <div className="h-44 overflow-hidden rounded-2xl bg-zinc-950">
+              <section className="rounded-3xl border border-amber-500 bg-zinc-950 p-7">
+                <div className="h-44 overflow-hidden rounded-2xl bg-zinc-900">
                   {barber.imageUrl ? (
                     <img
                       src={barber.imageUrl}
@@ -107,7 +118,7 @@ export function BarberDetails() {
                 <h1 className="mt-7 text-3xl font-black text-white">
                   {barber.name}
                 </h1>
-                <p className="mt-3 leading-7 text-zinc-400">
+                <p className="mt-3 leading-7 text-zinc-200">
                   {barber.description}
                 </p>
                 <button
@@ -125,10 +136,10 @@ export function BarberDetails() {
                 <p className="text-sm font-bold uppercase tracking-[.2em] text-amber-500">
                   Disponibilidade
                 </p>
-                <h2 className="mt-2 text-3xl font-black text-black">
+                <h2 className="mt-2 text-3xl font-black text-white">
                   Horários de {barber.name}
                 </h2>
-                <label className="mt-6 block max-w-xs text-sm font-bold text-zinc-600">
+                <label className="mt-6 block max-w-xs text-sm font-bold text-zinc-100">
                   Escolha o dia
                   <input
                     type="date"
@@ -145,13 +156,13 @@ export function BarberDetails() {
                     <Loading text="Buscando horários..." />
                   </div>
                 ) : schedules.length === 0 ? (
-                  <div className="mt-7 rounded-2xl border border-white/10 bg-zinc-900 p-6 text-zinc-400">
+                  <div className="mt-7 rounded-2xl border border-white/10 bg-zinc-950 p-6 text-zinc-400">
                     Não há horários disponíveis para este dia. Escolha outra
                     data.
                   </div>
                 ) : (
                   <div className="mt-7">
-                    <p className="mb-3 font-bold capitalize text-zinc-600">
+                    <p className="mb-3 font-bold capitalize text-zinc-100">
                       {dateFormatter.format(new Date(`${date}T12:00:00`))}
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -168,13 +179,10 @@ export function BarberDetails() {
                           className={`rounded-xl border px-4 py-3 text-sm font-bold ${
                             s.available === false
                               ? "cursor-not-allowed border-white/5 bg-zinc-900/60 text-zinc-600"
-                              : "border-white/10 bg-zinc-950 text-zinc-300 hover:border-amber-500 hover:text-amber-500"
+                              : "border-white/10 bg-zinc-950 text-zinc-300 hover:border-amber-500 hover:text-amber-500 hover:cursor-pointer"
                           }`}
                         >
-                          {s.time}{" "}
-                          {s.available === false
-                            ? "· Indisponível"
-                            : "· Agendar"}
+                          {s.time}{s.available === false && " · Indisponível"}{s.available === true && " · Agendar"}
                         </button>
                       ))}
                     </div>
@@ -184,7 +192,8 @@ export function BarberDetails() {
             </div>
           )
         )}
+        </div>
       </main>
-    </>
+    </div>
   );
 }
