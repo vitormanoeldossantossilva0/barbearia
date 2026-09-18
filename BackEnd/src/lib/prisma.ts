@@ -11,29 +11,25 @@ export function createPrismaClient(connectionString: string): PrismaClient {
   });
 }
 
-let localPrisma: PrismaClient | undefined;
+let prisma: PrismaClient | undefined;
 
-function getLocalPrisma(): PrismaClient {
-  if (localPrisma) {
-    return localPrisma;
+export function setPrismaClient(connectionString: string): void {
+  if (!prisma) {
+    prisma = createPrismaClient(connectionString);
   }
-
-  const connectionString = process.env.DATABASE_URL;
-
-  if (!connectionString) {
-    throw new Error("DATABASE_URL não configurado no ambiente.");
-  }
-
-  localPrisma = createPrismaClient(connectionString);
-
-  return localPrisma;
 }
 
-const prisma = new Proxy({} as PrismaClient, {
+export function getPrisma(): PrismaClient {
+  if (!prisma) {
+    throw new Error("Prisma ainda não foi inicializado.");
+  }
+
+  return prisma;
+}
+
+export default new Proxy({} as PrismaClient, {
   get(_target, property) {
-    const client = getLocalPrisma();
+    const client = getPrisma();
     return Reflect.get(client, property);
   },
 });
-
-export default prisma;
