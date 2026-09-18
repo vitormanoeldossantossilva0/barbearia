@@ -3,7 +3,7 @@ const API_URL = (
   (window.location.hostname === "localhost" ||
   window.location.hostname === "127.0.0.1"
     ? "http://localhost:3333"
-    : "https://barbearia-k02x.onrender.com")
+    : "https://agendamentoaarbershop.vitormanoeldossantossilva0.workers.dev")
 ).replace(/\/$/, "");
 
 export class ApiError extends Error {
