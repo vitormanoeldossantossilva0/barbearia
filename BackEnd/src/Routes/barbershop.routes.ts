@@ -39,13 +39,100 @@ router.get("/public-default", async (_req, res) => {
 router.get("/public/:slug", async (req, res) => {
   try {
     const slug = String(req.params.slug).trim().toLowerCase();
+
+    // A página pública precisa da barbearia, barbeiros e serviços.
+    // Buscar tudo em uma única consulta evita três requisições HTTP e
+    // reduz consultas repetidas ao PostgreSQL na abertura da Home.
     const shop = await prisma.barbershop.findUnique({
       where: { slug },
-      include: { barbers: { select: { id: true, name: true, description: true, slug: true, whatsapp: true, imageUrl: true, instagram: true, facebook: true, tiktok: true }, orderBy: { name: "asc" } } },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        whatsapp: true,
+        imageUrl: true,
+        instagram: true,
+        facebook: true,
+        tiktok: true,
+        createdAt: true,
+        barbers: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            slug: true,
+            whatsapp: true,
+            imageUrl: true,
+            instagram: true,
+            facebook: true,
+            tiktok: true,
+          },
+          orderBy: { name: "asc" },
+        },
+        serviceTopics: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            imageUrl: true,
+            services: {
+              where: { barberId: { not: null } },
+              select: {
+                id: true,
+                name: true,
+                price: true,
+                category: true,
+                topicId: true,
+              },
+              orderBy: { name: "asc" },
+            },
+          },
+          orderBy: [{ createdAt: "asc" }, { name: "asc" }],
+        },
+      },
     });
-    if (!shop) return res.status(404).json({ mensagem: "Barbearia não encontrada." });
-    return res.json(shop);
-  } catch (error) { console.error(error); return res.status(500).json({ mensagem: "Erro ao buscar barbearia." }); }
+
+    if (!shop) {
+      return res.status(404).json({ mensagem: "Barbearia não encontrada." });
+    }
+
+    const serviceTopics = shop.serviceTopics.map((topic) => ({
+      ...topic,
+      // Mantém o mesmo comportamento do endpoint público antigo:
+      // serviços com o mesmo nome aparecem apenas uma vez.
+      services: Array.from(
+        new Map(
+          topic.services.map((service) => [
+            service.name.trim().toLowerCase(),
+            service,
+          ]),
+        ).values(),
+      ),
+    }));
+
+    // Os dados públicos mudam pouco. Um cache curto do navegador reduz
+    // novas consultas quando o usuário recarrega a mesma página.
+    res.set("Cache-Control", "public, max-age=15, stale-while-revalidate=60");
+
+    return res.json({
+      id: shop.id,
+      name: shop.name,
+      slug: shop.slug,
+      description: shop.description,
+      whatsapp: shop.whatsapp,
+      imageUrl: shop.imageUrl,
+      instagram: shop.instagram,
+      facebook: shop.facebook,
+      tiktok: shop.tiktok,
+      createdAt: shop.createdAt,
+      barbers: shop.barbers,
+      serviceTopics,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ mensagem: "Erro ao buscar barbearia." });
+  }
 });
 
 

@@ -18,6 +18,7 @@ export interface Barbershop {
   tiktok?: string | null;
   createdAt?: string;
   barbers?: Barber[];
+  serviceTopics?: ServiceTopic[];
 }
 
 export interface Barber {

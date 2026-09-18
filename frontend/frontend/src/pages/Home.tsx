@@ -6,9 +6,7 @@ import { BarberCard } from "../components/BarberCard";
 import { SectionTitle } from "../components/SectionTitle";
 import { Loading } from "../components/Loading";
 import { Modal } from "../components/Modal";
-import { barberService } from "../services/barbers";
 import { barbershopService } from "../services/barbershop";
-import { serviceTopicService } from "../services/serviceTopics";
 import type { Barber, Barbershop, ServiceTopic } from "../types";
 
 function Alert({ children }: { children: ReactNode }) {
@@ -45,15 +43,11 @@ export function Home() {
       return;
     }
 
-    Promise.all([
-      barbershopService.public(slug),
-      barberService.list(slug),
-      serviceTopicService.public(slug),
-    ])
-      .then(([shopData, barberData, topicData]) => {
+    barbershopService.public(slug)
+      .then((shopData) => {
         setShop(shopData);
-        setBarbers(barberData);
-        setTopics(topicData);
+        setBarbers(shopData.barbers ?? []);
+        setTopics(shopData.serviceTopics ?? []);
       })
       .catch((e) =>
         setError(e instanceof Error ? e.message : "Erro ao carregar a página."),
