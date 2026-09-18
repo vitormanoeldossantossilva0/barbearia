@@ -6,5 +6,11 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
-  "workers_dev": true
+  "workers_dev": true,
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      "id": "b4caeee31b2749f9b0a342cd5f5e7f26"
+    }
+  ]
 }
