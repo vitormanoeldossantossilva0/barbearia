@@ -303,7 +303,7 @@ export function Home() {
             />
             <div className="absolute inset-0 bg-gradient-to-r from-zinc-950/85 via-zinc-950/55 to-transparent" />
           </div>
-          <div className="mx-auto max-w-4xl px-4 py-8 text-center sm:px-8 sm:py-12">
+          <div className="mt-20 -mb-5 mx-auto max-w-4xl px-4 py-8 text-center sm:px-8 sm:py-12">
             <p className="text-xs font-bold uppercase tracking-[.25em] text-amber-500">
               Seu horário está esperando por você
             </p>
