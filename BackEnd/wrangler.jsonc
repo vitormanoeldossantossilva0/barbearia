@@ -1,8 +1,8 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "barbearia-api",
+  "name": "agendamentoabarbershop",
   "main": "src/worker.ts",
-  "compatibility_date": "2026-08-04",
+  "compatibility_date": "2026-09-18",
   "compatibility_flags": [
     "nodejs_compat"
   ],
