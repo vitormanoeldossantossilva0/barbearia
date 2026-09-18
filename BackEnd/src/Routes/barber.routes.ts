@@ -139,7 +139,10 @@ router.post("/", authMiddleware, adminOnly, async (req, res) => {
       return res.status(400).json({ mensagem: "Os links das redes sociais devem começar com http:// ou https://." });
     }
 
-    if (!req.auth!.barbershopId) return res.status(400).json({ mensagem: "Barbearia da conta não encontrada." });
+    const barbershopId = req.auth?.barbershopId;
+    if (typeof barbershopId !== "number" || !Number.isInteger(barbershopId) || barbershopId <= 0) {
+      return res.status(403).json({ mensagem: "Conta não vinculada a uma barbearia válida." });
+    }
 
     if (name.length < 2 || !email || password.length < 8) {
       return res.status(400).json({
@@ -167,7 +170,7 @@ router.post("/", authMiddleware, adminOnly, async (req, res) => {
           instagram,
           facebook,
           tiktok,
-          barbershopId: req.auth!.barbershopId,
+          barbershopId,
         },
       });
       const user = await tx.user.create({
