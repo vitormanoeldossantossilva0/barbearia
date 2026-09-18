@@ -116,8 +116,8 @@ export function Home() {
                 Bem-vindo à sua experiência
               </p>
               <h1 className="mt-5 text-5xl font-black leading-[.96] tracking-tight sm:text-7xl">
-                {shop?.name || "Sua barbearia"}{" "}
-                <span className="text-amber-500">do seu jeito.</span>
+                {"Mais que um corte,"}
+                <span className="text-amber-500"> uma tradição.</span>
               </h1>
               <p className="mt-7 max-w-xl text-lg leading-8 text-zinc-300">
                 {shop?.description ||
