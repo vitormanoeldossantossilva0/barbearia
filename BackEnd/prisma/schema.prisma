@@ -3,8 +3,10 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client"
-  output   = "./generated"
+  provider   = "prisma-client"
+  output     = "./generated"
+  runtime    = "cloudflare"
+  engineType = "client"
 }
 
 enum AppointmentStatus {
