@@ -85,7 +85,7 @@ export function ResetPassword() {
           <input
             type="password"
             required
-            minLength={6}
+            minLength={8}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="mt-2 w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 font-normal outline-none focus:border-amber-500"
@@ -97,7 +97,7 @@ export function ResetPassword() {
           <input
             type="password"
             required
-            minLength={6}
+            minLength={8}
             value={confirmation}
             onChange={(e) => setConfirmation(e.target.value)}
             className="mt-2 w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 font-normal outline-none focus:border-amber-500"

@@ -4,3 +4,5 @@ node_modules
 .wrangler
 
 prisma/generated/
+
+.env-backup

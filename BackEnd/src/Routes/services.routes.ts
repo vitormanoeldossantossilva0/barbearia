@@ -94,6 +94,12 @@ router.get("/", async (req, res) => {
       return res.status(400).json({ mensagem: "Barbeiro inválido." });
     }
 
+    if (barberId === undefined && !barbershopSlug) {
+      return res.status(400).json({
+        mensagem: "Informe a barbearia ou o barbeiro.",
+      });
+    }
+
     let shopBarberIds: number[] | undefined;
     if (barbershopSlug) {
       const shop = await prisma.barbershop.findUnique({

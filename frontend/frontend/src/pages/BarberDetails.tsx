@@ -57,11 +57,11 @@ export function BarberDetails() {
     if (!barberId || !date) return;
     setLoadingSchedules(true);
     scheduleService
-      .list(barberId, date)
+      .list(barberId, date, shopSlug)
       .then(setSchedules)
       .catch((e) => setError(e.message))
       .finally(() => setLoadingSchedules(false));
-  }, [barberId, date]);
+  }, [barberId, date, shopSlug]);
 
   if (loading)
     return (

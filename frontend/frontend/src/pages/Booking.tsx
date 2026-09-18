@@ -118,7 +118,7 @@ export function Booking() {
       .then(setServices)
       .catch((e) => setError(e.message))
       .finally(() => setLoadingServices(false));
-  }, [barberId]);
+  }, [barberId, shopSlug]);
 
   useEffect(() => {
     if (!barberId || !appointmentDate) {
@@ -128,7 +128,7 @@ export function Booking() {
     setLoadingSchedules(true);
     setError("");
     scheduleService
-      .list(barberId, appointmentDate)
+      .list(barberId, appointmentDate, shopSlug)
       .then((items) => {
         setSchedules(items);
         if (

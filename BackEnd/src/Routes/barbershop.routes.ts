@@ -17,6 +17,19 @@ const socialUrl = (value: unknown) => {
   }
 };
 
+const httpUrl = (value: unknown) => {
+  const url = String(value ?? "").trim();
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "http:" || parsed.protocol === "https:"
+      ? parsed.toString()
+      : null;
+  } catch {
+    return null;
+  }
+};
+
 router.get("/public-default", async (_req, res) => {
   try {
     const shop = await prisma.barbershop.findFirst({
@@ -147,13 +160,17 @@ router.get("/mine", authMiddleware, async (req, res) => {
 
 router.put("/mine", authMiddleware, async (req, res) => {
   try {
+    const requestedImageUrl = httpUrl(req.body.imageUrl);
+    if (String(req.body.imageUrl ?? "").trim() && !requestedImageUrl) {
+      return res.status(400).json({ mensagem: "A imagem deve usar uma URL http:// ou https:// válida." });
+    }
     if (req.auth!.role !== "ADMIN" || !req.auth!.barbershopId) return res.status(403).json({ mensagem: "Somente o administrador da barbearia pode alterar essas informações." });
     const current = await prisma.barbershop.findUnique({ where: { id: req.auth!.barbershopId } });
     if (!current) return res.status(404).json({ mensagem: "Barbearia não encontrada." });
     const name = String(req.body.name ?? current.name).trim();
     const description = String(req.body.description ?? current.description).trim();
     const whatsapp = String(req.body.whatsapp ?? current.whatsapp ?? "").trim() || null;
-    const imageUrl = String(req.body.imageUrl ?? current.imageUrl ?? "").trim() || null;
+    const imageUrl = req.body.imageUrl === undefined ? current.imageUrl : requestedImageUrl;
     const instagram = socialUrl(req.body.instagram ?? current.instagram);
     const facebook = socialUrl(req.body.facebook ?? current.facebook);
     const tiktok = socialUrl(req.body.tiktok ?? current.tiktok);
@@ -173,6 +190,10 @@ router.get("/master", authMiddleware, masterOnly, async (_req, res) => {
 
 router.post("/master", authMiddleware, masterOnly, async (req, res) => {
   try {
+    const imageUrl = httpUrl(req.body.imageUrl);
+    if (String(req.body.imageUrl ?? "").trim() && !imageUrl) {
+      return res.status(400).json({ mensagem: "A imagem deve usar uma URL http:// ou https:// válida." });
+    }
     const name = String(req.body.name ?? "").trim();
     const ownerName = String(req.body.ownerName ?? "").trim();
     const email = String(req.body.email ?? "").trim().toLowerCase();
@@ -195,7 +216,7 @@ router.post("/master", authMiddleware, masterOnly, async (req, res) => {
     if (await prisma.barber.findUnique({ where: { slug: barberSlug } })) barberSlug = `${barberSlug}-${Date.now()}`;
     const passwordHash = await bcrypt.hash(password, 12);
     const result = await prisma.$transaction(async tx => {
-      const shop = await tx.barbershop.create({ data: { name, slug, description, whatsapp, imageUrl: String(req.body.imageUrl ?? "").trim() || null, instagram, facebook, tiktok } });
+      const shop = await tx.barbershop.create({ data: { name, slug, description, whatsapp, imageUrl, instagram, facebook, tiktok } });
       const barber = await tx.barber.create({ data: { name: ownerName, description: "Administrador da barbearia", slug: barberSlug, whatsapp, barbershopId: shop.id } });
       const user = await tx.user.create({ data: { email, password: passwordHash, role: "ADMIN", barberId: barber.id } });
       const topics = await Promise.all([
@@ -274,13 +295,17 @@ router.delete("/master/:id", authMiddleware, masterOnly, async (req, res) => {
 
 router.put("/master/:id", authMiddleware, masterOnly, async (req, res) => {
   try {
+    const requestedImageUrl = httpUrl(req.body.imageUrl);
+    if (String(req.body.imageUrl ?? "").trim() && !requestedImageUrl) {
+      return res.status(400).json({ mensagem: "A imagem deve usar uma URL http:// ou https:// válida." });
+    }
     const id = Number(req.params.id);
     const current = await prisma.barbershop.findUnique({ where: { id } });
     if (!current) return res.status(404).json({ mensagem: "Barbearia não encontrada." });
     const name = String(req.body.name ?? current.name).trim();
     const description = String(req.body.description ?? current.description).trim();
     const whatsapp = String(req.body.whatsapp ?? current.whatsapp ?? "").trim() || null;
-    const imageUrl = String(req.body.imageUrl ?? current.imageUrl ?? "").trim() || null;
+    const imageUrl = req.body.imageUrl === undefined ? current.imageUrl : requestedImageUrl;
     const instagram = socialUrl(req.body.instagram ?? current.instagram);
     const facebook = socialUrl(req.body.facebook ?? current.facebook);
     const tiktok = socialUrl(req.body.tiktok ?? current.tiktok);

@@ -2,10 +2,11 @@ import { api } from "./api";
 import type { Schedule, ScheduleTemplate } from "../types";
 
 export const scheduleService = {
-  list: (barberId?: number, date?: string) => {
+  list: (barberId?: number, date?: string, barbershopSlug?: string) => {
     const params = new URLSearchParams();
     if (barberId) params.set("barberId", String(barberId));
     if (date) params.set("date", date);
+    if (barbershopSlug) params.set("barbershopSlug", barbershopSlug);
     const query = params.toString();
     return api.get<Schedule[]>(query ? `/schedules?${query}` : "/schedules");
   },

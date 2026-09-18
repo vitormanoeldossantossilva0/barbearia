@@ -1,6 +1,6 @@
 import { Router } from "express";
 import prisma from "../lib/prisma";
-import { authMiddleware } from "../middleware/auth";
+import { authMiddleware, barberOnly } from "../middleware/auth";
 
 const router = Router();
 
@@ -19,7 +19,7 @@ function parseDate(dateInput: unknown) {
   return date;
 }
 
-router.get("/", authMiddleware, async (req, res) => {
+router.get("/", barberOnly, async (req, res) => {
   try {
     const date = req.query.date ? parseDate(req.query.date) : null;
     if (req.query.date && !date) {
@@ -44,7 +44,7 @@ router.get("/", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/mine", authMiddleware, async (req, res) => {
+router.get("/mine", barberOnly, async (req, res) => {
   try {
     const appointments = await prisma.appointment.findMany({
       where: { barberId: req.auth!.barberId },
@@ -58,7 +58,7 @@ router.get("/mine", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/:id", authMiddleware, async (req, res) => {
+router.get("/:id", barberOnly, async (req, res) => {
   try {
     const id = Number(req.params.id);
     const appointment = await prisma.appointment.findUnique({
@@ -239,7 +239,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.patch("/:id/status", authMiddleware, async (req, res) => {
+router.patch("/:id/status", barberOnly, async (req, res) => {
   try {
     const id = Number(req.params.id);
     const appointment = await prisma.appointment.findUnique({ where: { id } });
@@ -265,7 +265,7 @@ router.patch("/:id/status", authMiddleware, async (req, res) => {
   }
 });
 
-router.delete("/:id/permanent", authMiddleware, async (req, res) => {
+router.delete("/:id/permanent", barberOnly, async (req, res) => {
   try {
     const id = Number(req.params.id);
     const appointment = await prisma.appointment.findUnique({
@@ -299,7 +299,7 @@ router.delete("/:id/permanent", authMiddleware, async (req, res) => {
   }
 });
 
-router.delete("/:id", authMiddleware, async (req, res) => {
+router.delete("/:id", barberOnly, async (req, res) => {
   try {
     const id = Number(req.params.id);
     const appointment = await prisma.appointment.findUnique({ where: { id } });

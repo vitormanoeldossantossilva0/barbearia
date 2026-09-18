@@ -40,7 +40,7 @@ export function AdminDashboard() {
 
   useEffect(() => {
     Promise.all([
-      barberService.list(),
+      barberService.list(shopSlug),
       serviceService.mine(),
       scheduleService.mine(),
       appointmentService.listByDate(today),

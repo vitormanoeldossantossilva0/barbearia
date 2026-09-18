@@ -1,6 +1,6 @@
 import { Router } from "express";
 import prisma from "../lib/prisma";
-import { authMiddleware } from "../middleware/auth";
+import { barberOnly } from "../middleware/auth";
 
 const router = Router();
 
@@ -18,8 +18,33 @@ function parseDate(dateInput: unknown) {
 router.get("/", async (req, res) => {
   try {
     const barberId = req.query.barberId ? Number(req.query.barberId) : undefined;
-    if (barberId !== undefined && !Number.isInteger(barberId)) {
-      return res.status(400).json({ mensagem: "Barbeiro inválido." });
+    const barbershopSlug = String(
+      req.query.barbershopSlug ?? "",
+    ).trim().toLowerCase();
+
+    if (
+      barberId === undefined ||
+      !Number.isInteger(barberId) ||
+      barberId <= 0 ||
+      !barbershopSlug
+    ) {
+      return res.status(400).json({
+        mensagem: "Informe a barbearia e o barbeiro.",
+      });
+    }
+
+    const barber = await prisma.barber.findFirst({
+      where: {
+        id: barberId,
+        barbershop: { slug: barbershopSlug },
+      },
+      select: { id: true },
+    });
+
+    if (!barber) {
+      return res.status(404).json({
+        mensagem: "Barbeiro não pertence a esta barbearia.",
+      });
     }
 
     const selectedDate = req.query.date ? parseDate(req.query.date) : null;
@@ -123,7 +148,7 @@ router.get("/", async (req, res) => {
 });
 
 // Admin: mostra os horários-modelo, sem exigir dia/mês.
-router.get("/mine", authMiddleware, async (req, res) => {
+router.get("/mine", barberOnly, async (req, res) => {
   try {
     const templates = await prisma.scheduleTemplate.findMany({
       where: { barberId: req.auth!.barberId },
@@ -138,7 +163,7 @@ router.get("/mine", authMiddleware, async (req, res) => {
 
 // Cria somente o horário. A data será escolhida pelo cliente.
 // O sistema trabalha somente com HH:MM (sem segundos).
-router.post("/", authMiddleware, async (req, res) => {
+router.post("/", barberOnly, async (req, res) => {
   try {
     if (typeof req.auth?.barberId !== "number") {
       return res.status(403).json({ mensagem: "Esta conta não possui um barbeiro vinculado." });
@@ -173,7 +198,7 @@ router.post("/", authMiddleware, async (req, res) => {
   }
 });
 
-router.delete("/:id", authMiddleware, async (req, res) => {
+router.delete("/:id", barberOnly, async (req, res) => {
   try {
     const id = Number(req.params.id);
     if (!Number.isInteger(id)) return res.status(400).json({ mensagem: "Horário inválido." });

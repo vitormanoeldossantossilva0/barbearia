@@ -25,13 +25,36 @@ const socialUrl = (value: unknown) => {
   }
 };
 
+
+
+const httpUrl = (value: unknown) => {
+  const url = String(value ?? "").trim();
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "http:" || parsed.protocol === "https:"
+      ? parsed.toString()
+      : null;
+  } catch {
+    return null;
+  }
+};
+
 router.get("/", async (req, res) => {
   try {
-    const shopSlug = String(req.query.barbershopSlug ?? "").trim();
-    const shop = shopSlug ? await prisma.barbershop.findUnique({ where: { slug: shopSlug } }) : null;
-    if (shopSlug && !shop) return res.status(404).json({ mensagem: "Barbearia não encontrada." });
+    const shopSlug = String(req.query.barbershopSlug ?? "").trim().toLowerCase();
+    if (!shopSlug) {
+      return res.status(400).json({
+        mensagem: "Informe a barbearia.",
+      });
+    }
+
+    const shop = await prisma.barbershop.findUnique({
+      where: { slug: shopSlug },
+    });
+    if (!shop) return res.status(404).json({ mensagem: "Barbearia não encontrada." });
     const barbers = await prisma.barber.findMany({
-      where: shop ? { barbershopId: shop.id } : undefined,
+      where: { barbershopId: shop.id },
       select: { id: true, name: true, description: true, slug: true, whatsapp: true, imageUrl: true, instagram: true, facebook: true, tiktok: true, barbershopId: true },
       orderBy: { name: "asc" },
     });
@@ -101,6 +124,10 @@ router.get("/:id", async (req, res) => {
 
 router.post("/", authMiddleware, adminOnly, async (req, res) => {
   try {
+    const imageUrl = httpUrl(req.body.imageUrl);
+    if (String(req.body.imageUrl ?? "").trim() && !imageUrl) {
+      return res.status(400).json({ mensagem: "A imagem deve usar uma URL http:// ou https:// válida." });
+    }
     const name = String(req.body.name ?? "").trim();
     const description = String(req.body.description ?? "").trim();
     const email = String(req.body.email ?? "").trim().toLowerCase();
@@ -136,7 +163,7 @@ router.post("/", authMiddleware, adminOnly, async (req, res) => {
           description,
           slug,
           whatsapp: String(req.body.whatsapp ?? "").trim() || null,
-          imageUrl: String(req.body.imageUrl ?? "").trim() || null,
+          imageUrl,
           instagram,
           facebook,
           tiktok,
@@ -161,6 +188,10 @@ router.post("/", authMiddleware, adminOnly, async (req, res) => {
 
 router.put("/:id", authMiddleware, async (req, res) => {
   try {
+    const imageUrl = httpUrl(req.body.imageUrl);
+    if (String(req.body.imageUrl ?? "").trim() && !imageUrl) {
+      return res.status(400).json({ mensagem: "A imagem deve usar uma URL http:// ou https:// válida." });
+    }
     const id = Number(req.params.id);
     if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ mensagem: "Barbeiro inválido." });
     if (!req.auth!.barbershopId || !req.auth!.barberId) return res.status(403).json({ mensagem: "Conta sem barbearia vinculada." });
@@ -217,7 +248,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
           description,
           slug,
           whatsapp,
-          imageUrl: String(req.body.imageUrl ?? "").trim() || null,
+          imageUrl: req.body.imageUrl === undefined ? current.imageUrl : imageUrl,
           instagram,
           facebook,
           tiktok,
