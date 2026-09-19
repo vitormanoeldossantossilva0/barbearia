@@ -1,15 +1,7 @@
 import { PrismaClient } from "../../prisma/generated/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
-const GLOBAL_PRISMA_KEY = "__BARBEARIA_PRISMA_CLIENT__" as const;
-
-type GlobalWithPrisma = typeof globalThis & {
-  [GLOBAL_PRISMA_KEY]?: PrismaClient;
-};
-
-function getGlobalPrisma(): PrismaClient | undefined {
-  return (globalThis as GlobalWithPrisma)[GLOBAL_PRISMA_KEY];
-}
+let prisma: PrismaClient | undefined;
 
 export function createPrismaClient(connectionString: string): PrismaClient {
   const adapter = new PrismaPg({
@@ -22,34 +14,28 @@ export function createPrismaClient(connectionString: string): PrismaClient {
 }
 
 export function setPrismaClient(connectionString: string): void {
-  const global = globalThis as GlobalWithPrisma;
-
-  if (!global[GLOBAL_PRISMA_KEY]) {
-    global[GLOBAL_PRISMA_KEY] = createPrismaClient(connectionString);
+  if (!prisma) {
+    prisma = createPrismaClient(connectionString);
   }
 }
 
-function getPrisma(): PrismaClient {
-  const client = getGlobalPrisma();
+export function getPrismaClient(): PrismaClient {
+  if (!prisma) {
+    const connectionString = process.env.DATABASE_URL;
 
-  if (client) {
-    return client;
+    if (!connectionString) {
+      throw new Error("Prisma ainda não foi inicializado.");
+    }
+
+    prisma = createPrismaClient(connectionString);
   }
 
-  const connectionString = process.env.DATABASE_URL;
-
-  if (!connectionString) {
-    throw new Error("DATABASE_URL não configurado no ambiente.");
-  }
-
-  const localClient = createPrismaClient(connectionString);
-  (globalThis as GlobalWithPrisma)[GLOBAL_PRISMA_KEY] = localClient;
-  return localClient;
+  return prisma;
 }
 
 export default new Proxy({} as PrismaClient, {
   get(_target, property) {
-    const client = getPrisma();
+    const client = getPrismaClient();
     return Reflect.get(client, property);
   },
 });
